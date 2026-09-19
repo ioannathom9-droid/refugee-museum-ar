@@ -1,48 +1,111 @@
-<title>Refugee Museum AR</title>
-    <!-- Βιβλιοθήκες A-Frame και AR.js -->
+<!DOCTYPE html>
+<html lang="el">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Refugee Museum AR</title>
+
+    <!-- 1. Βιβλιοθήκη A-Frame -->
     <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+
+    <!-- 2. Βιβλιοθήκη AR.js για A-Frame -->
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+
+    <style>
+      /* Κουμπί για να επιτραπεί ο ήχος στα κινητά */
+      #startBtn {
+        position: fixed;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 99999;
+        padding: 14px 28px;
+        background-color: #007bff;
+        color: #ffffff;
+        border: none;
+        border-radius: 30px;
+        font-size: 16px;
+        font-weight: bold;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+      }
+
+      /* Ένδειξη στην οθόνη όταν διαβαστεί το marker */
+      #statusMsg {
+        position: fixed;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 99999;
+        background: rgba(0, 0, 0, 0.75);
+        color: #00ffff;
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-family: sans-serif;
+        font-size: 15px;
+        display: none;
+      }
+    </style>
   </head>
   <body style="margin: 0px; overflow: hidden;">
 
+    <!-- Ειδοποίηση αναγνώρισης -->
+    <div id="statusMsg">Το marker εντοπίστηκε!</div>
+
+    <!-- Κουμπί ενεργοποίησης ήχου -->
+    <button id="startBtn">Πατήστε εδώ για Έναρξη Ήχου</button>
+
+    <!-- AR Σκηνή -->
     <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
       
-      <!-- Δήλωση του ηχητικού αρχείου -->
+      <!-- Αρχείο Ήχου -->
       <a-assets>
-        <audio id="audioKounia" src="kounia.mp3" preload="auto"></audio>
+        <audio id="audioKounia" src="./kounia.mp3" preload="auto"></audio>
       </a-assets>
 
-      <!-- Σύνδεση με το marker kounia.patt -->
-      <a-marker type="pattern" url="kounia.patt" id="marker-kounia">
-        <!-- Ένας διακριτικός περιστρεφόμενος δακτύλιος ένδειξης ότι το marker εντοπίστηκε -->
-        <a-ring color="#00ffff" radius-inner="0.3" radius-outer="0.5" rotation="-90 0 0"></a-ring>
+      <!-- Custom Marker (kounia.patt) -->
+      <a-marker type="pattern" url="./kounia.patt" id="marker-kounia">
+        <!-- Περιστρεφόμενος γαλάζιος κύκλος πάνω από το marker -->
+        <a-ring color="#00ffff" radius-inner="0.3" radius-outer="0.6" rotation="-90 0 0"></a-ring>
       </a-marker>
 
-      <!-- Κάμερα της σκηνής -->
+      <!-- Κάμερα -->
       <a-entity camera></a-entity>
 
     </a-scene>
 
-    <!-- Κώδικας αναπαραγωγής ήχου -->
+    <!-- Λειτουργικότητα Ήχου και Marker -->
     <script>
-      window.addEventListener('load', () => {
-        const marker = document.querySelector('#marker-kounia');
-        const audio = document.querySelector('#audioKounia');
-        let hasPlayed = false;
+      const audio = document.querySelector('#audioKounia');
+      const startBtn = document.querySelector('#startBtn');
+      const statusMsg = document.querySelector('#statusMsg');
+      const marker = document.querySelector('#marker-kounia');
+      let audioReady = false;
+      let hasPlayed = false;
 
-        // Απαραίτητο για κινητά: πρώτο tap στην οθόνη για άδεια ήχου
-        window.addEventListener('click', () => {
-          audio.load();
-        }, { once: true });
-
-        // Μόλις διαβάσει το marker
-        marker.addEventListener('markerFound', () => {
-          if (!hasPlayed) {
-            audio.play();
-            hasPlayed = true;
-          }
+      // 1. Ξεκλείδωμα ήχου με το πάτημα του κουμπιού
+      startBtn.addEventListener('click', () => {
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          audioReady = true;
+          startBtn.style.display = 'none'; // Το κουμπί εξαφανίζεται
+        }).catch((err) => {
+          console.error("Audio unlock error: ", err);
         });
       });
+
+      // 2. Όταν η κάμερα δει το marker
+      marker.addEventListener('markerFound', () => {
+        statusMsg.style.display = 'block';
+
+        // Αν έχει πατηθεί το κουμπί και δεν έχει ξαναπαίξει, ξεκινάει
+        if (audioReady && !hasPlayed) {
+          audio.play();
+          hasPlayed = true; // Δεν ξαναξεκινάει από την αρχή αν χαθεί και ξαναφανεί
+        }
+      });
+      // Σημείωση: Δεν υπάρχει εντολή markerLost, άρα ο ήχος συνεχίζει να παίζει κανονικά!
     </script>
   </body>
 </html>
