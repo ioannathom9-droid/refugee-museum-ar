@@ -12,6 +12,17 @@
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
 
     <style>
+      /* Διόρθωση για να μην ζουμάρει η κάμερα σε συσκευές Xiaomi / Poco */
+      video {
+        width: 100vw !important;
+        height: 100vh !important;
+        object-fit: cover !important;
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: -2 !important;
+      }
+
       /* Κουμπί για να επιτραπεί ο ήχος στα κινητά */
       #startBtn {
         position: fixed;
@@ -55,16 +66,21 @@
     <!-- Κουμπί ενεργοποίησης ήχου -->
     <button id="startBtn">Πατήστε εδώ για Έναρξη Ήχου</button>
 
-    <!-- AR Σκηνή -->
-    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+    <!-- AR Σκηνή με ρυθμίσεις ανάλυσης για αποφυγή παραμόρφωσης -->
+    <a-scene 
+      embedded 
+      arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
       <!-- Αρχείο Ήχου -->
       <a-assets>
         <audio id="audioKounia" src="./kounia.mp3" preload="auto"></audio>
       </a-assets>
 
-      <!-- Custom Marker (kounia.patt) -->
-      <a-marker type="pattern" url="https://raw.githubusercontent.com/ioannathom9-droid/refugee-museum-ar/main/kounia.patt" id="marker-kounia">
+      <!-- Custom Marker με ασφαλή σύνδεσμο φόρτωσης -->
+      <a-marker 
+        type="pattern" 
+        url="https://raw.githack.com/ioannathom9-droid/refugee-museum-ar/main/kounia.patt" 
+        id="marker-kounia">
         <!-- Περιστρεφόμενος γαλάζιος κύκλος πάνω από το marker -->
         <a-ring color="#00ffff" radius-inner="0.3" radius-outer="0.6" rotation="-90 0 0"></a-ring>
       </a-marker>
@@ -102,10 +118,9 @@
         // Αν έχει πατηθεί το κουμπί και δεν έχει ξαναπαίξει, ξεκινάει
         if (audioReady && !hasPlayed) {
           audio.play();
-          hasPlayed = true; // Δεν ξαναξεκινάει από την αρχή αν χαθεί και ξαναφανεί
+          hasPlayed = true; // Συνεχής αναπαραγωγή χωρίς διακοπή
         }
       });
-      // Σημείωση: Δεν υπάρχει εντολή markerLost, άρα ο ήχος συνεχίζει να παίζει κανονικά!
     </script>
   </body>
 </html>
