@@ -5,117 +5,97 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
-    <!-- 1. Βιβλιοθήκη A-Frame -->
-    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
-
-    <!-- 2. Βιβλιοθήκη AR.js για A-Frame -->
-    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <!-- Πλήρως συμβατές βιβλιοθήκες A-Frame και AR.js -->
+    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
     <style>
-      /* Διόρθωση για να μην ζουμάρει η κάμερα σε συσκευές Xiaomi / Poco */
-      video {
-        width: 100vw !important;
-        height: 100vh !important;
-        object-fit: cover !important;
-        position: absolute;
-        top: 0;
-        left: 0;
-        z-index: -2 !important;
+      body {
+        margin: 0;
+        overflow: hidden;
       }
-
-      /* Κουμπί για να επιτραπεί ο ήχος στα κινητά */
       #startBtn {
         position: fixed;
         bottom: 30px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 99999;
-        padding: 14px 28px;
+        z-index: 999999;
+        padding: 16px 30px;
         background-color: #007bff;
         color: #ffffff;
         border: none;
         border-radius: 30px;
         font-size: 16px;
         font-weight: bold;
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
-        cursor: pointer;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5);
       }
-
-      /* Ένδειξη στην οθόνη όταν διαβαστεί το marker */
       #statusMsg {
         position: fixed;
         top: 20px;
         left: 50%;
         transform: translateX(-50%);
-        z-index: 99999;
-        background: rgba(0, 0, 0, 0.75);
-        color: #00ffff;
-        padding: 10px 20px;
+        z-index: 999999;
+        background: rgba(0, 0, 0, 0.85);
+        color: #00ff00;
+        padding: 12px 24px;
         border-radius: 8px;
         font-family: sans-serif;
-        font-size: 15px;
+        font-size: 16px;
+        font-weight: bold;
         display: none;
       }
     </style>
   </head>
-  <body style="margin: 0px; overflow: hidden;">
+  <body>
 
-    <!-- Ειδοποίηση αναγνώρισης -->
     <div id="statusMsg">Το marker εντοπίστηκε!</div>
-
-    <!-- Κουμπί ενεργοποίησης ήχου -->
     <button id="startBtn">Πατήστε εδώ για Έναρξη Ήχου</button>
 
-    <!-- AR Σκηνή με ρυθμίσεις ανάλυσης για αποφυγή παραμόρφωσης -->
     <a-scene 
       embedded 
-      arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
+      arjs="sourceType: webcam; debugUIEnabled: false; detectionMode: mono_and_matrix; matrixCodeType: 3x3;">
       
-      <!-- Αρχείο Ήχου -->
       <a-assets>
-        <audio id="audioKounia" src="./kounia.mp3" preload="auto"></audio>
+        <audio id="audioKounia" src="kounia.mp3" preload="auto"></audio>
       </a-assets>
 
-      <!-- Custom Marker με ασφαλή σύνδεσμο φόρτωσης -->
-      <a-marker preset="hiro" id="marker-kounia">
-        <!-- Περιστρεφόμενος γαλάζιος κύκλος πάνω από το marker -->
-        <a-ring color="#00ffff" radius-inner="0.3" radius-outer="0.6" rotation="-90 0 0"></a-ring>
+      <!-- Άμεση δήλωση του Hiro marker -->
+      <a-marker preset="hiro" id="targetMarker">
+        <a-box position="0 0.5 0" material="color: red; opacity: 0.7;"></a-box>
       </a-marker>
 
-      <!-- Κάμερα -->
       <a-entity camera></a-entity>
 
     </a-scene>
 
-    <!-- Λειτουργικότητα Ήχου και Marker -->
     <script>
-      const audio = document.querySelector('#audioKounia');
-      const startBtn = document.querySelector('#startBtn');
-      const statusMsg = document.querySelector('#statusMsg');
-      const marker = document.querySelector('#marker-kounia');
-      let audioReady = false;
-      let hasPlayed = false;
+      const audio = document.getElementById('audioKounia');
+      const startBtn = document.getElementById('startBtn');
+      const statusMsg = document.getElementById('statusMsg');
+      const marker = document.getElementById('targetMarker');
+      let audioUnlocked = false;
+      let hasStarted = false;
 
-      // 1. Ξεκλείδωμα ήχου με το πάτημα του κουμπιού
+      // Ξεκλείδωμα ήχου
       startBtn.addEventListener('click', () => {
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
-          audioReady = true;
-          startBtn.style.display = 'none'; // Το κουμπί εξαφανίζεται
-        }).catch((err) => {
-          console.error("Audio unlock error: ", err);
+          audioUnlocked = true;
+          startBtn.style.display = 'none';
+        }).catch(err => {
+          console.error("Audio error:", err);
+          audioUnlocked = true;
+          startBtn.style.display = 'none';
         });
       });
 
-      // 2. Όταν η κάμερα δει το marker
+      // Εντοπισμός marker
       marker.addEventListener('markerFound', () => {
         statusMsg.style.display = 'block';
-
-        // Αν έχει πατηθεί το κουμπί και δεν έχει ξαναπαίξει, ξεκινάει
-        if (audioReady && !hasPlayed) {
+        if (audioUnlocked && !hasStarted) {
           audio.play();
-          hasPlayed = true; // Συνεχής αναπαραγωγή χωρίς διακοπή
+          hasStarted = true;
         }
       });
     </script>
