@@ -22,52 +22,55 @@
         left: 0;
         z-index: -2 !important;
       }
-      /* Πλήρης επικάλυψη για ένα απλό άγγιγμα οπουδήποτε στην οθόνη */
-      #tapOverlay {
+      /* Σταθερή οθόνη εκκίνησης που ΔΕΝ κλείνει μόνη της */
+      #startScreen {
         position: fixed;
         top: 0;
         left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.7);
-        z-index: 2147483647;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(10, 10, 10, 0.92);
+        z-index: 9999999;
         display: flex;
         flex-direction: column;
-        align-items: center;
         justify-content: center;
-        color: #ffffff;
-        font-family: sans-serif;
+        align-items: center;
         text-align: center;
         padding: 20px;
         box-sizing: border-box;
       }
-      #tapOverlay h2 {
+      #startScreen h1 {
+        color: #ffffff;
+        font-family: sans-serif;
         font-size: 22px;
-        margin-bottom: 10px;
+        margin-bottom: 25px;
       }
-      #tapOverlay p {
-        font-size: 16px;
-        color: #00ff00;
+      #playButton {
+        background-color: #28a745;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: bold;
+        padding: 18px 36px;
+        border: none;
+        border-radius: 40px;
+        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        cursor: pointer;
       }
     </style>
   </head>
   <body>
 
-    <!-- Οθόνη ενεργοποίησης: πατάτε οπουδήποτε -->
-    <div id="tapOverlay">
-      <h2>Refugee Museum AR</h2>
-      <p>👉 Αγγίξτε οπουδήποτε στην οθόνη για να ξεκινήσετε 👈</p>
+    <!-- Οθόνη με μεγάλο πράσινο κουμπί -->
+    <div id="startScreen">
+      <h1>Refugee Museum AR</h1>
+      <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
     </div>
 
     <a-scene 
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <a-assets>
-        <audio id="audioSource" src="kounia.mp3" preload="auto"></audio>
-      </a-assets>
-
-      <!-- Το Marker Hiro με τον ήχο ενσωματωμένο -->
+      <!-- Marker Hiro -->
       <a-marker preset="hiro" id="myMarker">
         <a-box position="0 0.5 0" material="color: #00ff00; opacity: 0.8;"></a-box>
       </a-marker>
@@ -76,29 +79,32 @@
     </a-scene>
 
     <script>
-      const overlay = document.getElementById('tapOverlay');
-      const audioElement = document.getElementById('audioSource');
-      const marker = document.getElementById('myMarker');
-      let soundActive = false;
+      // Φόρτωση του αρχείου ήχου
+      const audio = new Audio('kounia.mp3');
+      audio.preload = 'auto';
 
-      // Με ένα άγγιγμα οπουδήποτε ξεκλειδώνει ο ήχος και φεύγει η οθόνη
-      overlay.addEventListener('click', () => {
-        audioElement.play().then(() => {
-          audioElement.pause();
-          audioElement.currentTime = 0;
-          soundActive = true;
-          overlay.style.display = 'none';
-        }).catch(err => {
-          console.error("Audio error:", err);
-          soundActive = true;
-          overlay.style.display = 'none';
+      const startScreen = document.getElementById('startScreen');
+      const playButton = document.getElementById('playButton');
+      const marker = document.getElementById('myMarker');
+      let soundUnlocked = false;
+
+      // Μόνο όταν πατηθεί το κουμπί ξεκλειδώνει ο ήχος και ανοίγει η κάμερα
+      playButton.addEventListener('click', () => {
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          soundUnlocked = true;
+          startScreen.style.display = 'none';
+        }).catch(() => {
+          soundUnlocked = true;
+          startScreen.style.display = 'none';
         });
       });
 
-      // Όταν εμφανιστεί το marker, παίζει ο ήχος
+      // Όταν αναγνωριστεί το marker
       marker.addEventListener('markerFound', () => {
-        if (soundActive) {
-          audioElement.play().catch(e => console.error(e));
+        if (soundUnlocked) {
+          audio.play().catch(err => console.error("Playback error: ", err));
         }
       });
     </script>
