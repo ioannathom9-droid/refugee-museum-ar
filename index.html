@@ -55,14 +55,14 @@
         padding: 18px 36px;
         border: none;
         border-radius: 40px;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.6);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         cursor: pointer;
       }
     </style>
   </head>
   <body>
 
-    <!-- Οθόνη για το αρχικό πάτημα (απαραίτητο για άδεια ήχου στο Android) -->
+    <!-- Οθόνη για το αρχικό πάτημα -->
     <div id="startScreen">
       <h1>Refugee Museum AR</h1>
       <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
@@ -72,16 +72,13 @@
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <!-- Το Marker Hiro (με τον πράσινο κύβο ως οπτική επιβεβαίωση) -->
-      <a-marker preset="hiro" id="myMarker">
-        <a-box position="0 0.5 0" material="color: #00ff00; opacity: 0.8;"></a-box>
-      </a-marker>
+      <!-- Το δικό σας Custom Marker χωρίς κανένα 3D αντικείμενο/κύβο -->
+      <a-marker type="pattern" url="kounia.patt" id="myMarker"></a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // Το νέο, συμβατό MP3 αρχείο
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
 
@@ -91,7 +88,7 @@
       let soundUnlocked = false;
       let isPlaying = false;
 
-      // Με το πάτημα ξεκλειδώνει το κανάλι ήχου του κινητού
+      // Ξεκλείδωμα ήχου με το πάτημα του κουμπιού
       playButton.addEventListener('click', () => {
         audio.play().then(() => {
           audio.pause();
@@ -105,7 +102,7 @@
         });
       });
 
-      // Μόλις εντοπιστεί το marker, ξεκινάει η αφήγηση
+      // Μόλις η κάμερα δει το δικό σας marker
       marker.addEventListener('markerFound', () => {
         if (soundUnlocked && !isPlaying) {
           audio.play().then(() => {
