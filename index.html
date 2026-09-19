@@ -1,23 +1,48 @@
-<script>
-  window.addEventListener('load', () => {
-    const marker = document.querySelector('#marker-kounia');
-    const audio = document.querySelector('#audioKounia');
-    let hasPlayed = false; // Μεταβλητή για να μην ξεκινάει ξανά από την αρχή αν ξαναδεί το marker
+<title>Refugee Museum AR</title>
+    <!-- Βιβλιοθήκες A-Frame και AR.js -->
+    <script src="https://aframe.io/releases/1.2.0/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+  </head>
+  <body style="margin: 0px; overflow: hidden;">
 
-    // Απαραίτητο για κινητά (iOS / Android): δίνει άδεια ήχου με το πρώτο άγγιγμα στην οθόνη
-    window.addEventListener('click', () => {
-      audio.load();
-    }, { once: true });
+    <a-scene embedded arjs="sourceType: webcam; debugUIEnabled: false;">
+      
+      <!-- Δήλωση του ηχητικού αρχείου -->
+      <a-assets>
+        <audio id="audioKounia" src="kounia.mp3" preload="auto"></audio>
+      </a-assets>
 
-    // Μόλις εντοπιστεί το marker για πρώτη φορά
-    marker.addEventListener('markerFound', () => {
-      if (!hasPlayed) {
-        audio.play();
-        hasPlayed = true; // Σημειώνουμε ότι ξεκίνησε
-      }
-    });
+      <!-- Σύνδεση με το marker kounia.patt -->
+      <a-marker type="pattern" url="kounia.patt" id="marker-kounia">
+        <!-- Ένας διακριτικός περιστρεφόμενος δακτύλιος ένδειξης ότι το marker εντοπίστηκε -->
+        <a-ring color="#00ffff" radius-inner="0.3" radius-outer="0.5" rotation="-90 0 0"></a-ring>
+      </a-marker>
 
-    // ΔΕΝ βάζουμε markerLost listener! 
-    // Έτσι, όταν η κάμερα χάσει το marker, ο ήχος ΔΕΝ σταματάει.
-  });
-</script>
+      <!-- Κάμερα της σκηνής -->
+      <a-entity camera></a-entity>
+
+    </a-scene>
+
+    <!-- Κώδικας αναπαραγωγής ήχου -->
+    <script>
+      window.addEventListener('load', () => {
+        const marker = document.querySelector('#marker-kounia');
+        const audio = document.querySelector('#audioKounia');
+        let hasPlayed = false;
+
+        // Απαραίτητο για κινητά: πρώτο tap στην οθόνη για άδεια ήχου
+        window.addEventListener('click', () => {
+          audio.load();
+        }, { once: true });
+
+        // Μόλις διαβάσει το marker
+        marker.addEventListener('markerFound', () => {
+          if (!hasPlayed) {
+            audio.play();
+            hasPlayed = true;
+          }
+        });
+      });
+    </script>
+  </body>
+</html>
