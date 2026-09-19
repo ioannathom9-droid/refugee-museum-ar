@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
+    <!-- Βιβλιοθήκες A-Frame και AR.js -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
 
@@ -13,6 +14,7 @@
         margin: 0;
         overflow: hidden;
       }
+      /* Σωστή προβολή κάμερας χωρίς παραμόρφωση για συσκευές Poco */
       video {
         width: 100vw !important;
         height: 100vh !important;
@@ -22,14 +24,14 @@
         left: 0;
         z-index: -2 !important;
       }
-      /* Σταθερή οθόνη εκκίνησης που ΔΕΝ κλείνει μόνη της */
+      /* Οθόνη εκκίνησης */
       #startScreen {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(10, 10, 10, 0.92);
+        background-color: rgba(10, 10, 10, 0.9);
         z-index: 9999999;
         display: flex;
         flex-direction: column;
@@ -60,7 +62,7 @@
   </head>
   <body>
 
-    <!-- Οθόνη με μεγάλο πράσινο κουμπί -->
+    <!-- Οθόνη για το αρχικό πάτημα (απαραίτητο για άδεια ήχου στο Android) -->
     <div id="startScreen">
       <h1>Refugee Museum AR</h1>
       <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
@@ -70,7 +72,7 @@
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <!-- Marker Hiro -->
+      <!-- Το Marker Hiro (με τον πράσινο κύβο ως οπτική επιβεβαίωση) -->
       <a-marker preset="hiro" id="myMarker">
         <a-box position="0 0.5 0" material="color: #00ff00; opacity: 0.8;"></a-box>
       </a-marker>
@@ -79,7 +81,7 @@
     </a-scene>
 
     <script>
-      // Φόρτωση του αρχείου ήχου
+      // Το νέο, συμβατό MP3 αρχείο
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
 
@@ -87,24 +89,30 @@
       const playButton = document.getElementById('playButton');
       const marker = document.getElementById('myMarker');
       let soundUnlocked = false;
+      let isPlaying = false;
 
-      // Μόνο όταν πατηθεί το κουμπί ξεκλειδώνει ο ήχος και ανοίγει η κάμερα
+      // Με το πάτημα ξεκλειδώνει το κανάλι ήχου του κινητού
       playButton.addEventListener('click', () => {
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
           soundUnlocked = true;
           startScreen.style.display = 'none';
-        }).catch(() => {
+        }).catch(err => {
+          console.error("Audio error:", err);
           soundUnlocked = true;
           startScreen.style.display = 'none';
         });
       });
 
-      // Όταν αναγνωριστεί το marker
+      // Μόλις εντοπιστεί το marker, ξεκινάει η αφήγηση
       marker.addEventListener('markerFound', () => {
-        if (soundUnlocked) {
-          audio.play().catch(err => console.error("Playback error: ", err));
+        if (soundUnlocked && !isPlaying) {
+          audio.play().then(() => {
+            isPlaying = true;
+          }).catch(err => {
+            console.error("Play error:", err);
+          });
         }
       });
     </script>
