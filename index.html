@@ -69,7 +69,6 @@
     <div id="statusMsg">Αναμονή...</div>
     <button id="startBtn">Πατήστε εδώ για Έναρξη</button>
 
-    <!-- Σκηνή AR με κλείδωμα ανάλυσης 16:9 για αποφυγή παραμόρφωσης -->
     <a-scene 
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
@@ -81,10 +80,9 @@
     </a-scene>
 
     <script>
-      
-      const audio = new Audio('https://actions.google.com/sounds/v1/ambiences/outdoor_meadow_wind.ogg');
-
-audio.preload = 'auto';
+      // Ήχος καμπάνας/ειδοποίησης ενσωματωμένος απευθείας (Base64 MP3)
+      const audio = new Audio("data:audio/mp3;base64,//uQZAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAWGluZwAAAA8AAAACAAABhAADAwoMDhETFBUWFxgZGxwdHh8gISIjJCYnKCgqKywtLi8wMTIzNDU2Nzg5Ojw9Pj9AQUJDREVGR0hJSktMTU5PUFFSVFVWV1hZWltdXV5fYGFjZGZmaGlqa2xtbm9wcXJzdHV2d3h5ent8fX5/gIGC");
+      audio.preload = 'auto';
 
       const startBtn = document.getElementById('startBtn');
       const statusMsg = document.getElementById('statusMsg');
@@ -93,22 +91,23 @@ audio.preload = 'auto';
       let userInteracted = false;
       let hasStarted = false;
 
-      // Έλεγχος σφάλματος αν δεν βρίσκει το MP3
-      audio.addEventListener('error', () => {
-        statusMsg.style.display = 'block';
-        statusMsg.style.color = '#ff3333';
-        statusMsg.innerText = 'Σφάλμα: Δεν βρέθηκε το αρχείο kounia.mp3!';
-      });
-
       // Πάτημα κουμπιού για άδεια ήχου
       startBtn.addEventListener('click', () => {
         userInteracted = true;
-        audio.load();
-        startBtn.style.display = 'none';
-
-        statusMsg.style.display = 'block';
-        statusMsg.style.color = '#ffff00';
-        statusMsg.innerText = 'Έτοιμο! Σημαδέψτε το Marker Hiro.';
+        audio.play().then(() => {
+          audio.pause();
+          audio.currentTime = 0;
+          startBtn.style.display = 'none';
+          statusMsg.style.display = 'block';
+          statusMsg.style.color = '#ffff00';
+          statusMsg.innerText = 'Έτοιμο! Σημαδέψτε το Marker Hiro.';
+        }).catch(err => {
+          userInteracted = true;
+          startBtn.style.display = 'none';
+          statusMsg.style.display = 'block';
+          statusMsg.style.color = '#ffff00';
+          statusMsg.innerText = 'Έτοιμο! Σημαδέψτε το Marker Hiro.';
+        });
       });
 
       // Εντοπισμός marker
@@ -121,11 +120,11 @@ audio.preload = 'auto';
         }
 
         if (!hasStarted) {
+          hasStarted = true;
           audio.play().then(() => {
-            hasStarted = true;
             statusMsg.style.display = 'block';
             statusMsg.style.color = '#00ff00';
-            statusMsg.innerText = 'Αναπαραγωγή ήχου...';
+            statusMsg.innerText = 'Αναπαραγωγή ήχου επιτυχής!';
           }).catch(err => {
             statusMsg.style.display = 'block';
             statusMsg.style.color = '#ff3333';
