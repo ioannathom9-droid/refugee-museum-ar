@@ -84,13 +84,15 @@
           - rotation: περιστροφή -90 μοίρες στον άξονα X για να σταθεί όρθια πάνω στο marker
         -->
         <a-entity 
+         <!-- Κούνια με κίνηση μπρος-πίσω (άξονας X) -->
+        <a-entity 
           id="cradleModel"
           gltf-model="cradle.glb"
           scale="1.2 1.2 1.2"
           position="0 0 0"
           rotation="-90 0 0"
-          animation="property: rotation; from: -90 0 -8; to: -90 0 8; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
-        </a-entity>
+          animation="property: rotation; from: -98 0 0; to: -82 0 0; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
+         </a-entity>
 
       </a-marker>
 
