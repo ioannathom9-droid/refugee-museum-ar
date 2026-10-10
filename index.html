@@ -14,7 +14,7 @@
         margin: 0;
         overflow: hidden;
       }
-      /* Σωστή προβολή κάμερας χωρίς παραμόρφωση για συσκευές Poco */
+      /* Προσαρμογή βίντεο κάμερας σε πλήρη οθόνη χωρίς παραμορφώσεις */
       video {
         width: 100vw !important;
         height: 100vh !important;
@@ -24,7 +24,7 @@
         left: 0;
         z-index: -2 !important;
       }
-      /* Οθόνη εκκίνησης */
+      /* Αρχική οθόνη για ξεκλείδωμα του ήχου στα κινητά */
       #startScreen {
         position: fixed;
         top: 0;
@@ -62,23 +62,42 @@
   </head>
   <body>
 
-    <!-- Οθόνη για το αρχικό πάτημα -->
+    <!-- Οθόνη έναρξης -->
     <div id="startScreen">
       <h1>Refugee Museum AR</h1>
       <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
     </div>
 
+    <!-- Σκηνή AR -->
     <a-scene 
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <!-- Το δικό σας Custom Marker χωρίς κανένα 3D αντικείμενο/κύβο -->
-      <a-marker type="pattern" url="kounia.patt" id="myMarker"></a-marker>
+      <!-- Custom Marker (kounia.patt) -->
+      <a-marker type="pattern" url="kounia.patt" id="myMarker">
+        
+        <!-- 
+          3D Μοντέλο Κούνιας:
+          - gltf-model: το αρχείο cradle.glb
+          - animation: κίνηση λικνίσματος πέρα-δώθε (-7° έως +7°)
+        -->
+        <a-entity 
+          id="cradleModel"
+          gltf-model="cradle.glb"
+          scale="0.25 0.25 0.25"
+          position="0 0 0"
+          rotation="0 0 0"
+          animation="property: rotation; from: 0 0 -7; to: 0 0 7; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
+        </a-entity>
 
+      </a-marker>
+
+      <!-- Κάμερα A-Frame -->
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
+      // Ήχος νανουρίσματος
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
 
@@ -102,16 +121,4 @@
         });
       });
 
-      // Μόλις η κάμερα δει το δικό σας marker
-      marker.addEventListener('markerFound', () => {
-        if (soundUnlocked && !isPlaying) {
-          audio.play().then(() => {
-            isPlaying = true;
-          }).catch(err => {
-            console.error("Play error:", err);
-          });
-        }
-      });
-    </script>
-  </body>
-</html>
+      // Όταν η κάμερα εντοπίσει το marker
