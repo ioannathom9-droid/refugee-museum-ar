@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="el">
   <head>
@@ -61,34 +62,31 @@
   </head>
   <body>
 
-    <!-- Οθόνη για το αρχικό πάτημα -->
+    <!-- Οθόνη εκκίνησης -->
     <div id="startScreen">
       <h1>Refugee Museum AR</h1>
       <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
     </div>
 
+    <!-- Σκηνή AR -->
     <a-scene 
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <!-- Φωτισμός για σωστή απεικόνιση των χρωμάτων -->
+      <!-- Φωτισμός -->
       <a-entity light="type: ambient; color: #ffffff; intensity: 1.5;"></a-entity>
       <a-entity light="type: directional; color: #ffffff; intensity: 1.0" position="-1 2 1"></a-entity>
 
       <!-- Custom Marker -->
       <a-marker type="pattern" url="kounia.patt" id="myMarker">
         
-        <!-- 
-          Η τρισδιάστατη κούνια:
-          - scale: αυξήθηκε σε 1.2 για να φαίνεται σε καλό μέγεθος
-          - rotation: περιστροφή -90 μοίρες στον άξονα X για να σταθεί όρθια πάνω στο marker
-        -->
-      <a-entity 
+        <!-- Εξωτερικό στοιχείο: Λίκνισμα πάνω στα πέδιλα -->
+        <a-entity 
           id="cradleRocker"
           position="0 0 0"
           animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
 
-          <!-- Εσωτερικό στοιχείο: Κρατάει την κούνια όρθια -->
+          <!-- 1. Η κούνια -->
           <a-entity 
             id="cradleModel"
             gltf-model="cradle.glb"
@@ -97,15 +95,25 @@
             position="0 0 0">
           </a-entity>
 
-        </a-entity>
+          <!-- 2. Το φασκιωμένο μωρό πάνω στο στρώμα -->
+          <a-image 
+            id="babyImage"
+            src="baby.png"
+            position="0 0.22 0"
+            rotation="-90 0 0"
+            width="0.5"
+            height="0.8"
+            material="transparent: true; alphaTest: 0.5;">
+          </a-image>
 
-      </a-marker>
+        </a-entity>
 
       </a-marker>
 
       <a-entity camera></a-entity>
     </a-scene>
 
+    <!-- JavaScript για τον ήχο και το κουμπί έναρξης -->
     <script>
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
@@ -119,7 +127,7 @@
       playButton.addEventListener('click', () => {
         startScreen.style.display = 'none';
 
-        // Προετοιμασία ήχου
+        // Σιωπηλό ξεκλείδωμα ήχου για browsers
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
