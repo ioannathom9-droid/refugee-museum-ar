@@ -14,7 +14,6 @@
         margin: 0;
         overflow: hidden;
       }
-      /* Προσαρμογή βίντεο κάμερας σε πλήρη οθόνη χωρίς παραμορφώσεις */
       video {
         width: 100vw !important;
         height: 100vh !important;
@@ -24,14 +23,14 @@
         left: 0;
         z-index: -2 !important;
       }
-      /* Αρχική οθόνη για ξεκλείδωμα του ήχου στα κινητά */
+      /* Οθόνη εκκίνησης */
       #startScreen {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(10, 10, 10, 0.9);
+        background-color: rgba(10, 10, 10, 0.85);
         z-index: 9999999;
         display: flex;
         flex-direction: column;
@@ -62,63 +61,82 @@
   </head>
   <body>
 
-    <!-- Οθόνη έναρξης -->
+    <!-- Οθόνη για το αρχικό πάτημα -->
     <div id="startScreen">
       <h1>Refugee Museum AR</h1>
       <button id="playButton">🔊 Πατήστε εδώ για Έναρξη</button>
     </div>
 
-    <!-- Σκηνή AR -->
     <a-scene 
       embedded 
       arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
       
-      <!-- Custom Marker (kounia.patt) -->
+      <!-- Φωτισμός για σωστή απεικόνιση των χρωμάτων -->
+      <a-entity light="type: ambient; color: #ffffff; intensity: 1.5;"></a-entity>
+      <a-entity light="type: directional; color: #ffffff; intensity: 1.0" position="-1 2 1"></a-entity>
+
+      <!-- Custom Marker -->
       <a-marker type="pattern" url="kounia.patt" id="myMarker">
         
         <!-- 
-          3D Μοντέλο Κούνιας:
-          - gltf-model: το αρχείο cradle.glb
-          - animation: κίνηση λικνίσματος πέρα-δώθε (-7° έως +7°)
+          Η τρισδιάστατη κούνια:
+          - scale: αυξήθηκε σε 1.2 για να φαίνεται σε καλό μέγεθος
+          - rotation: περιστροφή -90 μοίρες στον άξονα X για να σταθεί όρθια πάνω στο marker
         -->
         <a-entity 
           id="cradleModel"
           gltf-model="cradle.glb"
-          scale="0.25 0.25 0.25"
+          scale="1.2 1.2 1.2"
           position="0 0 0"
-          rotation="0 0 0"
-          animation="property: rotation; from: 0 0 -7; to: 0 0 7; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
+          rotation="-90 0 0"
+          animation="property: rotation; from: -90 0 -8; to: -90 0 8; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
         </a-entity>
 
       </a-marker>
 
-      <!-- Κάμερα A-Frame -->
       <a-entity camera></a-entity>
     </a-scene>
 
     <script>
-      // Ήχος νανουρίσματος
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
 
       const startScreen = document.getElementById('startScreen');
       const playButton = document.getElementById('playButton');
       const marker = document.getElementById('myMarker');
-      let soundUnlocked = false;
       let isPlaying = false;
 
-      // Ξεκλείδωμα ήχου με το πάτημα του κουμπιού
+      // Κλείσιμο οθόνης ΑΜΕΣΩΣ με το κλικ
       playButton.addEventListener('click', () => {
+        startScreen.style.display = 'none';
+
+        // Προετοιμασία ήχου
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
-          soundUnlocked = true;
-          startScreen.style.display = 'none';
         }).catch(err => {
-          console.error("Audio error:", err);
-          soundUnlocked = true;
-          startScreen.style.display = 'none';
+          console.warn("Audio unlock notice:", err);
         });
       });
 
-      // Όταν η κάμερα εντοπίσει το marker
+      // Μόλις εντοπιστεί το marker
+      marker.addEventListener('markerFound', () => {
+        if (!isPlaying) {
+          audio.play().then(() => {
+            isPlaying = true;
+          }).catch(err => {
+            console.error("Audio play error:", err);
+          });
+        }
+      });
+
+      // Αν χαθεί το marker
+      marker.addEventListener('markerLost', () => {
+        if (isPlaying) {
+          audio.pause();
+          isPlaying = false;
+        }
+      });
+    </script>
+  </body>
+</html>
