@@ -2,204 +2,41 @@
 <html lang="el">
   <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Refugee Museum AR</title>
-
-    <!-- Βιβλιοθήκες A-Frame & MindAR -->
+    <title>Inspector Preview</title>
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
-
-    <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-
-      /* Οθόνη Καλωσορίσματος */
-      #welcomeScreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(15, 15, 15, 0.95);
-        z-index: 10000;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 25px;
-        box-sizing: border-box;
-      }
-      #welcomeScreen h1 {
-        color: #ffffff;
-        font-family: sans-serif;
-        font-size: 22px;
-        margin-bottom: 15px;
-      }
-      #welcomeScreen p {
-        color: #dddddd;
-        font-family: sans-serif;
-        font-size: 15px;
-        line-height: 1.5;
-        max-width: 400px;
-        margin-bottom: 25px;
-      }
-      #startBtn {
-        background-color: #28a745;
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 16px 36px;
-        border: none;
-        border-radius: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        cursor: pointer;
-      }
-
-      /* Κάρτα καθοδήγησης */
-      #infoCard {
-        position: fixed;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.85);
-        color: #ffffff;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-family: sans-serif;
-        font-size: 14px;
-        text-align: center;
-        z-index: 9999;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        display: flex;
-        align-items: center;
-        gap: 12px;
-      }
-
-      /* Κουμπί για μετάβαση στο επόμενο έκθεμα */
-      #closeBtn {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 15px;
-        padding: 5px 12px;
-        font-size: 12px;
-        font-weight: bold;
-        cursor: pointer;
-        display: none;
-      }
-    </style>
+    <style>body { margin: 0; overflow: hidden; background: #222; }</style>
   </head>
   <body>
+    <a-scene>
+      <a-entity camera look-controls wasd-controls position="0 0.5 1.5"></a-entity>
+      <a-entity light="type: ambient; intensity: 1.5"></a-entity>
+      <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
 
-    <!-- Οθόνη Καλωσορίσματος -->
-    <div id="welcomeScreen">
-      <h1>Refugee Museum AR</h1>
-      <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς το χαρακτικό έκθεμα <strong>«Η ΝΕΑ ΖΩΗ»</strong>.</p>
-      <button id="startBtn">🔊 Έναρξη Εμπειρίας</button>
-    </div>
-
-    <!-- Μπάρα Καθοδήγησης & Κουμπί Επόμενου -->
-    <div id="infoCard">
-      <span id="infoText">Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.</span>
-      <button id="closeBtn">Επόμενο ✕</button>
-    </div>
-
-    <!-- Σκηνή AR -->
-    <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
-      color-space="sRGB" 
-      renderer="colorManagement: true, physicallyCorrectLights" 
-      vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
-      
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-      <!-- Έκθεμα 1: Η Νέα Ζωή -->
-      <a-entity mindar-image-target="targetIndex: 0" id="exhibit-01">
+      <!-- Σύστημα Κούνιας & Μωρού -->
+      <a-entity id="cradleRocker" position="0 0 0">
         
-        <!-- Το σωστό λίκνισμα στα πέδιλα -->
+        <!-- 1. Κούνια -->
         <a-entity 
-          id="cradleRocker" 
-          position="0 0 0"
-          animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
-          
-          <!-- 1. Κούνια (Πλάγια, όρθια, με τα πέδιλα κάτω) -->
-          <a-entity 
-            id="cradleModel"
-            gltf-model="cradle.glb" 
-            scale="0.42 0.42 0.42" 
-            position="0 -0.22 0"
-            rotation="0 0 0">
-          </a-entity>
-
-          <!-- 2. Μωρό (Ξαπλωμένο flat πάνω στο στρωματάκι και παράλληλα με τα κάγκελα) -->
-          <a-image 
-            id="babyImage"
-            src="baby.png" 
-           position="0 -0.09 0.05" 
-            rotation="-90 90 45" 
-            scale="0.55 0.55 0.55" 
-            width="0.7"
-            height="1.1"
-            material="transparent: true; alphaTest: 0.5;">
-          </a-image>
-
+          id="cradleModel"
+          gltf-model="cradle.glb" 
+          scale="0.33 0.33 0.33" 
+          position="0 -0.18 0" 
+          rotation="0 0 0">
         </a-entity>
 
+        <!-- 2. Μωρό -->
+        <a-image 
+          id="babyImage"
+          src="baby.png" 
+          position="0 -0.06 0" 
+          rotation="-90 90 0" 
+          scale="0.4 0.4 0.4" 
+          width="0.7"
+          height="1.1"
+          material="transparent: true; alphaTest: 0.5;">
+        </a-image>
+
       </a-entity>
-
     </a-scene>
-
-    <script>
-      const audio = new Audio('kounia.mp3');
-      audio.preload = 'auto';
-
-      const welcomeScreen = document.getElementById('welcomeScreen');
-      const startBtn = document.getElementById('startBtn');
-      const infoText = document.getElementById('infoText');
-      const closeBtn = document.getElementById('closeBtn');
-      const sceneEl = document.querySelector('a-scene');
-      const target01 = document.querySelector('#exhibit-01');
-      const cradleRocker = document.querySelector('#cradleRocker');
-
-      let isLocked = false;
-
-      startBtn.addEventListener('click', () => {
-        welcomeScreen.style.display = 'none';
-
-        audio.play().then(() => {
-          audio.pause();
-          audio.currentTime = 0;
-        }).catch(err => console.warn("Audio unlock notice:", err));
-
-        sceneEl.systems["mindar-image-system"].start();
-      });
-
-      target01.addEventListener("targetFound", () => {
-        if (!isLocked) {
-          isLocked = true;
-          cradleRocker.setAttribute('visible', 'true');
-          
-          infoText.innerText = "Έκθεμα: Η Νέα Ζωή";
-          closeBtn.style.display = "inline-block";
-
-          audio.play().catch(err => console.error("Audio error:", err));
-        }
-      });
-
-      closeBtn.addEventListener('click', () => {
-        isLocked = false;
-        cradleRocker.setAttribute('visible', 'false');
-        
-        audio.pause();
-        audio.currentTime = 0;
-
-        closeBtn.style.display = "none";
-        infoText.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
-      });
-    </script>
   </body>
 </html>
