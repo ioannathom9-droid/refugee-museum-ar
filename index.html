@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="el">
   <head>
@@ -6,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
-    <!-- Βιβλιοθήκες A-Frame και AR.js -->
+    <!-- Βιβλιοθήκες A-Frame και AR.js (έκδοση ειδικά για NFT) -->
     <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
-    <script src="https://raw.githack.com/AR-js-org/AR.js/3.4.5/aframe/build/aframe-ar.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
     <style>
       body {
@@ -24,7 +23,7 @@
         left: 0;
         z-index: -2 !important;
       }
-      /* Οθόνη εκκίνησης */
+      /* Οθόνη έναρξης για ήχο */
       #startScreen {
         position: fixed;
         top: 0;
@@ -58,9 +57,29 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         cursor: pointer;
       }
+      /* Οθόνη φόρτωσης του NFT Marker */
+      .arjs-loader {
+        height: 100%;
+        width: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+        background-color: rgba(0, 0, 0, 0.8);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-family: sans-serif;
+      }
     </style>
   </head>
   <body>
+
+    <!-- Μήνυμα φόρτωσης μέχρι να διαβαστούν τα αρχεία baby.* -->
+    <div class="arjs-loader">
+      <div>Φόρτωση δεδομένων εκθέματος... Παρακαλώ περιμένετε.</div>
+    </div>
 
     <!-- Οθόνη εκκίνησης -->
     <div id="startScreen">
@@ -70,38 +89,48 @@
 
     <!-- Σκηνή AR -->
     <a-scene 
+      vr-mode-ui="enabled: false;"
+      renderer="logarithmicDepthBuffer: true; precision: medium;"
       embedded 
-      arjs="sourceType: webcam; sourceWidth: 1280; sourceHeight: 720; displayWidth: 1280; displayHeight: 720; debugUIEnabled: false;">
+      arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
       
       <!-- Φωτισμός -->
       <a-entity light="type: ambient; color: #ffffff; intensity: 1.5;"></a-entity>
       <a-entity light="type: directional; color: #ffffff; intensity: 1.0" position="-1 2 1"></a-entity>
 
-      <!-- Custom Marker -->
-      <a-marker type="pattern" url="kounia.patt" id="myMarker">
+      <!-- NFT Marker: Η Νέα Ζωή (διαδρομή markers/01-newborn/baby) -->
+      <a-nft
+        id="myMarker"
+        type="nft"
+        url="./markers/01-newborn/baby"
+        smooth="true"
+        smoothCount="10"
+        smoothTolerance="0.01"
+        smoothThreshold="5">
         
         <!-- Εξωτερικό στοιχείο: Λίκνισμα πάνω στα πέδιλα -->
         <a-entity 
           id="cradleRocker"
-          position="0 0 0"
+          position="100 100 -200"
+          rotation="0 0 0"
           animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
 
           <!-- 1. Η κούνια -->
           <a-entity 
             id="cradleModel"
             gltf-model="cradle.glb"
-            scale="1.2 1.2 1.2"
+            scale="100 100 100"
             rotation="-90 0 0"
             position="0 0 0">
           </a-entity>
 
-          <!-- 2. Το φασκιωμένο μωρό με τις ακριβείς ρυθμίσεις από τον Inspector -->
+          <!-- 2. Το φασκιωμένο μωρό -->
           <a-image 
             id="babyImage"
             src="baby.png"
-            position="0.002 0.289 -0.121"
+            position="0.2 25 -10"
             rotation="-90 0 90"
-            scale="2 2 2"
+            scale="180 180 180"
             width="0.7"
             height="1.1"
             material="transparent: true; alphaTest: 0.5;">
@@ -109,12 +138,12 @@
 
         </a-entity>
 
-      </a-marker>
+      </a-nft>
 
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- JavaScript για τον ήχο και το κουμπί έναρξης -->
+    <!-- JavaScript για ήχο, loader και έναρξη -->
     <script>
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
@@ -124,11 +153,18 @@
       const marker = document.getElementById('myMarker');
       let isPlaying = false;
 
-      // Κλείσιμο οθόνης ΑΜΕΣΩΣ με το κλικ
+      // Εξαφάνιση του loader μόλις φορτωθεί το NFT marker
+      window.addEventListener('arjs-nft-loaded', function(ev) {
+        const loader = document.querySelector('.arjs-loader');
+        if (loader) {
+          loader.style.display = 'none';
+        }
+      });
+
+      // Έναρξη και ξεκλείδωμα ήχου
       playButton.addEventListener('click', () => {
         startScreen.style.display = 'none';
 
-        // Σιωπηλό ξεκλείδωμα ήχου για browsers
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
@@ -137,7 +173,7 @@
         });
       });
 
-      // Μόλις εντοπιστεί το marker
+      // Μόλις εντοπιστεί ο marker στην κάμερα
       marker.addEventListener('markerFound', () => {
         if (!isPlaying) {
           audio.play().then(() => {
@@ -148,7 +184,7 @@
         }
       });
 
-      // Αν χαθεί το marker
+      // Όταν χαθεί ο marker
       marker.addEventListener('markerLost', () => {
         if (isPlaying) {
           audio.pause();
