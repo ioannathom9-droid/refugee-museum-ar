@@ -15,14 +15,14 @@
         overflow: hidden;
       }
 
-      /* Οθόνη Καλωσορίσματος & Οδηγιών */
+      /* Οθόνη Καλωσορίσματος */
       #welcomeScreen {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(15, 15, 15, 0.9);
+        background-color: rgba(15, 15, 15, 0.95);
         z-index: 10000;
         display: flex;
         flex-direction: column;
@@ -58,13 +58,13 @@
         cursor: pointer;
       }
 
-      /* Διακριτική κάρτα καθοδήγησης πάνω από την κάμερα */
+      /* Διακριτική κάρτα καθοδήγησης */
       #infoCard {
         position: fixed;
         bottom: 25px;
         left: 50%;
         transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.75);
+        background-color: rgba(0, 0, 0, 0.8);
         color: #ffffff;
         padding: 12px 22px;
         border-radius: 20px;
@@ -73,7 +73,8 @@
         text-align: center;
         z-index: 9999;
         pointer-events: none;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        transition: all 0.3s ease;
       }
     </style>
   </head>
@@ -86,12 +87,12 @@
       <button id="startBtn">🔊 Έναρξη Εμπειρίας</button>
     </div>
 
-    <!-- Μήνυμα καθοδήγησης όσο είναι ανοιχτή η κάμερα -->
+    <!-- Μήνυμα καθοδήγησης πάνω από την κάμερα -->
     <div id="infoCard">Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.</div>
 
-    <!-- Σκηνή AR με MindAR -->
+    <!-- Σκηνή AR με φίλτρα εξομάλυνσης για μηδενισμό του τρεμοπαίγματος -->
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
       color-space="sRGB" 
       renderer="colorManagement: true, physicallyCorrectLights" 
       vr-mode-ui="enabled: false" 
@@ -102,24 +103,30 @@
       <!-- Σημείο 0: Έκθεμα "Η Νέα Ζωή" -->
       <a-entity mindar-image-target="targetIndex: 0" id="exhibit-01">
         
-        <!-- Κίνηση λικνίσματος -->
+        <!-- Εξωτερικό στοιχείο: Το λίκνισμα πάνω στα πέδιλα της κούνιας -->
         <a-entity 
           id="cradleRocker" 
-          animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
+          position="0 0 0"
+          animation="property: rotation; from: 0 0 -8; to: 0 0 8; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
           
           <!-- 1. Η κούνια (3D Μοντέλο) -->
           <a-entity 
+            id="cradleModel"
             gltf-model="cradle.glb" 
             scale="0.25 0.25 0.25" 
-            position="0 -0.1 0" 
-            rotation="0 0 0">
+            position="0 -0.05 0" 
+            rotation="0 90 0">
           </a-entity>
 
-          <!-- 2. Το μωράκι -->
+          <!-- 2. Το μωράκι (2D Εικόνα) - Ξαπλωμένο στο εσωτερικό της κούνιας -->
           <a-image 
+            id="babyImage"
             src="baby.png" 
-            position="0 0.05 0.02" 
-            scale="0.45 0.45 0.45" 
+            position="0.005 -0.01 0.05" 
+            rotation="0 0 0" 
+            scale="0.45 0.42 0.45" 
+            width="0.7"
+            height="1.1"
             material="transparent: true; alphaTest: 0.5;">
           </a-image>
 
@@ -129,7 +136,7 @@
 
     </a-scene>
 
-    <!-- Script ελέγχου ήχου, κάμερας & μηνυμάτων -->
+    <!-- JavaScript: Ήχος, Κάμερα & Μηνύματα -->
     <script>
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
@@ -141,17 +148,15 @@
       const target01 = document.querySelector('#exhibit-01');
       let isPlaying = false;
 
-      // Έναρξη εμπειρίας
+      // Έναρξη εμπειρίας & ξεκλείδωμα ήχου
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
 
-        // Ξεκλείδωμα ήχου
         audio.play().then(() => {
           audio.pause();
           audio.currentTime = 0;
         }).catch(err => console.warn("Audio unlock notice:", err));
 
-        // Εκκίνηση MindAR συστήματος
         sceneEl.systems["mindar-image-system"].start();
       });
 
@@ -167,10 +172,10 @@
         }
       });
 
-      // Όταν απομακρυνθεί η κάμερα
+      // Όταν χαθεί το σύμβολο από την κάμερα
       target01.addEventListener("targetLost", () => {
         infoCard.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
-        infoCard.style.borderColor = "rgba(255, 255, 255, 0.2)";
+        infoCard.style.borderColor = "rgba(255, 255, 255, 0.25)";
         
         if (isPlaying) {
           audio.pause();
