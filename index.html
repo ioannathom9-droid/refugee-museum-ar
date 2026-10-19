@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
-    <!-- Βιβλιοθήκες A-Frame και AR.js (έκδοση ειδικά για NFT) -->
-    <script src="https://aframe.io/releases/1.3.0/aframe.min.js"></script>
+    <!-- Σταθερές εκδόσεις A-Frame & AR.js NFT -->
+    <script src="https://cdn.jsdelivr.net/gh/aframevr/aframe@1c40837/dist/aframe-master.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar-nft.js"></script>
 
     <style>
@@ -14,24 +14,31 @@
         margin: 0;
         overflow: hidden;
       }
-      video {
-        width: 100vw !important;
-        height: 100vh !important;
-        object-fit: cover !important;
+      .arjs-loader {
+        height: 100%;
+        width: 100%;
         position: absolute;
         top: 0;
         left: 0;
-        z-index: -2 !important;
+        background-color: rgba(0, 0, 0, 0.85);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;
+        font-family: sans-serif;
+        text-align: center;
+        padding: 20px;
+        box-sizing: border-box;
       }
-      /* Οθόνη έναρξης για ήχο */
       #startScreen {
         position: fixed;
         top: 0;
         left: 0;
         width: 100vw;
         height: 100vh;
-        background-color: rgba(10, 10, 10, 0.85);
-        z-index: 9999999;
+        background-color: rgba(10, 10, 10, 0.9);
+        z-index: 10000;
         display: flex;
         flex-direction: column;
         justify-content: center;
@@ -57,28 +64,13 @@
         box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         cursor: pointer;
       }
-      /* Οθόνη φόρτωσης του NFT Marker */
-      .arjs-loader {
-        height: 100%;
-        width: 100%;
-        position: absolute;
-        top: 0;
-        left: 0;
-        background-color: rgba(0, 0, 0, 0.8);
-        z-index: 9999;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        color: white;
-        font-family: sans-serif;
-      }
     </style>
   </head>
   <body>
 
-    <!-- Μήνυμα φόρτωσης μέχρι να διαβαστούν τα αρχεία baby.* -->
-    <div class="arjs-loader">
-      <div>Φόρτωση δεδομένων εκθέματος... Παρακαλώ περιμένετε.</div>
+    <!-- Ένδειξη φόρτωσης -->
+    <div class="arjs-loader" id="loader">
+      <div>Φόρτωση δεδομένων εκθέματος...<br>Παρακαλώ περιμένετε λίγα δευτερόλεπτα.</div>
     </div>
 
     <!-- Οθόνη εκκίνησης -->
@@ -88,35 +80,31 @@
     </div>
 
     <!-- Σκηνή AR -->
-    <a-scene 
+    <a-scene
       vr-mode-ui="enabled: false;"
       renderer="logarithmicDepthBuffer: true; precision: medium;"
-      embedded 
+      embedded
       arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;">
-      
-      <!-- Φωτισμός -->
-      <a-entity light="type: ambient; color: #ffffff; intensity: 1.5;"></a-entity>
-      <a-entity light="type: directional; color: #ffffff; intensity: 1.0" position="-1 2 1"></a-entity>
 
-      <!-- NFT Marker: Η Νέα Ζωή (διαδρομή markers/01-newborn/baby) -->
+      <!-- NFT Marker -->
       <a-nft
         id="myMarker"
         type="nft"
-        url="./markers/01-newborn/baby"
+        url="https://ioannathom9-droid.github.io/refugee-museum-ar/markers/01-newborn/baby"
         smooth="true"
         smoothCount="10"
         smoothTolerance="0.01"
         smoothThreshold="5">
-        
-        <!-- Εξωτερικό στοιχείο: Λίκνισμα πάνω στα πέδιλα -->
-        <a-entity 
+
+        <!-- Στοιχείο λικνίσματος -->
+        <a-entity
           id="cradleRocker"
-          position="100 100 -200"
+          position="50 150 -100"
           rotation="0 0 0"
           animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1600; easing: easeInOutSine">
 
-          <!-- 1. Η κούνια -->
-          <a-entity 
+          <!-- 1. Κούνια -->
+          <a-entity
             id="cradleModel"
             gltf-model="cradle.glb"
             scale="100 100 100"
@@ -124,8 +112,8 @@
             position="0 0 0">
           </a-entity>
 
-          <!-- 2. Το φασκιωμένο μωρό -->
-          <a-image 
+          <!-- 2. Μωρό -->
+          <a-image
             id="babyImage"
             src="baby.png"
             position="0.2 25 -10"
@@ -143,25 +131,28 @@
       <a-entity camera></a-entity>
     </a-scene>
 
-    <!-- JavaScript για ήχο, loader και έναρξη -->
     <script>
       const audio = new Audio('kounia.mp3');
       audio.preload = 'auto';
 
       const startScreen = document.getElementById('startScreen');
       const playButton = document.getElementById('playButton');
+      const loader = document.getElementById('loader');
       const marker = document.getElementById('myMarker');
       let isPlaying = false;
 
-      // Εξαφάνιση του loader μόλις φορτωθεί το NFT marker
-      window.addEventListener('arjs-nft-loaded', function(ev) {
-        const loader = document.querySelector('.arjs-loader');
+      // Ασφαλής αφαίρεση loader
+      function hideLoader() {
         if (loader) {
           loader.style.display = 'none';
         }
-      });
+      }
 
-      // Έναρξη και ξεκλείδωμα ήχου
+      window.addEventListener('arjs-nft-loaded', hideLoader);
+
+      // Εφεδρικός χρονοδιακόπτης: αν το event αργήσει, ο loader κλείνει αυτόματα στα 8 δευτερόλεπτα
+      setTimeout(hideLoader, 8000);
+
       playButton.addEventListener('click', () => {
         startScreen.style.display = 'none';
 
@@ -173,7 +164,6 @@
         });
       });
 
-      // Μόλις εντοπιστεί ο marker στην κάμερα
       marker.addEventListener('markerFound', () => {
         if (!isPlaying) {
           audio.play().then(() => {
@@ -184,7 +174,6 @@
         }
       });
 
-      // Όταν χαθεί ο marker
       marker.addEventListener('markerLost', () => {
         if (isPlaying) {
           audio.pause();
