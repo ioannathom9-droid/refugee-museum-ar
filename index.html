@@ -120,34 +120,28 @@
       <!-- Έκθεμα 1: Η Νέα Ζωή -->
       <a-entity mindar-image-target="targetIndex: 0" id="exhibit-01">
         
-        <!-- Το λίκνισμα που είναι ήδη σωστό: ΔΕΝ ΑΛΛΑΞΕ ΚΑΘΟΛΟΥ -->
+        <!-- Το σωστό λίκνισμα στα πέδιλα -->
         <a-entity 
-          id="cradleRocker" 
-          position="0 0 0"
-          animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine"
-          
-          <!-- 1. Κούνια (Περιστροφή ώστε να βλέπει πλάγια με τα κάγκελα) -->
-         <a-entity 
           id="cradleRocker" 
           position="0 0 0"
           animation="property: rotation; from: -8 0 0; to: 8 0 0; dir: alternate; loop: true; dur: 1800; easing: easeInOutSine">
           
-          <!-- Γραμμή 135: Η κούνια (πλάγια και όρθια) -->
+          <!-- 1. Κούνια (Πλάγια, όρθια, με τα πέδιλα κάτω) -->
           <a-entity 
             id="cradleModel"
             gltf-model="cradle.glb" 
             scale="0.25 0.25 0.25" 
             position="0 -0.15 0" 
-            rotation="-90 0 0">
+            rotation="0 0 0">
           </a-entity>
 
-          <!-- Γραμμή 144: Το μωρό (ξαπλωμένο flat μέσα στην κούνια) -->
+          <!-- 2. Μωρό (Ξαπλωμένο flat πάνω στο στρωματάκι και παράλληλα με τα κάγκελα) -->
           <a-image 
             id="babyImage"
             src="baby.png" 
-            position="0.005 0.03 -0.05" 
+            position="0 -0.06 0" 
             rotation="-90 90 0" 
-            scale="0.5 0.5 0.5" 
+            scale="0.32 0.32 0.32" 
             width="0.7"
             height="1.1"
             material="transparent: true; alphaTest: 0.5;">
