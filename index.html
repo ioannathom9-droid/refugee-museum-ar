@@ -97,7 +97,7 @@
     <!-- Οθόνη Καλωσορίσματος -->
     <div id="welcomeScreen">
       <h1>Refugee Museum AR</h1>
-      <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς το χαρακτικό έκθεμα <strong>«Η ΝΕΑ ΖΩΗ»</strong>.</p>
+      <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς οποιοδήποτε έκθεμα.</p>
       <button id="startBtn">🔊 Έναρξη Εμπειρίας</button>
     </div>
 
@@ -117,8 +117,8 @@
       
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Έκθεμα 1: Η Νέα Ζωή -->
-      <a-entity mindar-image-target="targetIndex: 0" id="exhibit-01">
+      <!-- Έκθεμα 1: Η Νέα Ζωή (Image 1, targetIndex: 0) -->
+      <a-entity mindar-image-target="targetIndex: 0" id="newborn">
         
         <!-- Λίκνισμα στα πέδιλα -->
         <a-entity 
@@ -151,6 +151,38 @@
 
       </a-entity>
 
+      <!-- Έκθεμα 2: Παππούς (Image 2, targetIndex: 1) -->
+      <a-entity mindar-image-target="targetIndex: 1" id="pappous">
+      </a-entity>
+
+      <!-- Έκθεμα 3: Πούλος (Image 3, targetIndex: 2) -->
+      <a-entity mindar-image-target="targetIndex: 2" id="poulos">
+      </a-entity>
+
+      <!-- Έκθεμα 4: Ραπτομηχανή (Image 4, targetIndex: 3) -->
+      <a-entity mindar-image-target="targetIndex: 3" id="raptomihani">
+      </a-entity>
+
+      <!-- Έκθεμα 5: Σμύρνη (Image 5, targetIndex: 4) -->
+      <a-entity mindar-image-target="targetIndex: 4" id="smirni">
+      </a-entity>
+
+      <!-- Έκθεμα 6: Βάπτιση (Image 6, targetIndex: 5) -->
+      <a-entity mindar-image-target="targetIndex: 5" id="vaptisi">
+      </a-entity>
+
+      <!-- Έκθεμα 7: Αμάλθεια (Image 7, targetIndex: 6) -->
+      <a-entity mindar-image-target="targetIndex: 6" id="amaltheia">
+      </a-entity>
+
+      <!-- Έκθεμα 8: Φιλία (Image 8, targetIndex: 7) -->
+      <a-entity mindar-image-target="targetIndex: 7" id="filia">
+      </a-entity>
+
+      <!-- Έκθεμα 9: Γάμος (Image 9, targetIndex: 8) -->
+      <a-entity mindar-image-target="targetIndex: 8" id="gamos">
+      </a-entity>
+
     </a-scene>
 
     <script>
@@ -162,7 +194,8 @@
       const infoText = document.getElementById('infoText');
       const closeBtn = document.getElementById('closeBtn');
       const sceneEl = document.querySelector('a-scene');
-      const target01 = document.querySelector('#exhibit-01');
+
+      const targetNewborn = document.querySelector('#newborn');
       const cradleRocker = document.querySelector('#cradleRocker');
 
       let isLocked = false;
@@ -179,8 +212,8 @@
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // Όταν εντοπιστεί το σύμβολο
-      target01.addEventListener("targetFound", () => {
+      // Όταν εντοπιστεί το έκθεμα «Η Νέα Ζωή»
+      targetNewborn.addEventListener("targetFound", () => {
         if (!isLocked) {
           isLocked = true;
           cradleRocker.setAttribute('visible', 'true');
