@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="el">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Museum WebAR UI Mockup</title>
+  <style>
+    :root {
+      --terracotta: #A33827;
+      --antique-gold: #D4A343;
+      --heritage-blue: rgba(20, 36, 59, 0.94);
+      --vitrail-teal: #1E828A;
+      --silk-cream: #FBF8F1;
+      --text-muted: #D1C7BD;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+
+    body {
+      background-color: #2b2b2b;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    /* Προσομοίωση οθόνης κινητού */
+    .mobile-frame {
+      width: 375px;
+      height: 720px;
+      position: relative;
+      background: #111 url('https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?auto=format&fit=crop&w=600&q=80') center/cover;
+      border-radius: 36px;
+      overflow: hidden;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+      border: 8px solid #222;
+    }
+
+    /* Top Bar */
+    .top-bar {
+      position: absolute;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+
+    .badge {
+      background: var(--heritage-blue);
+      color: var(--silk-cream);
+      padding: 6px 14px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      border: 1px solid var(--antique-gold);
+      backdrop-filter: blur(6px);
+    }
+
+    /* Scanning Reticle */
+    .reticle {
+      position: absolute;
+      top: 35%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 180px;
+      height: 180px;
+      border: 2px dashed var(--vitrail-teal);
+      border-radius: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .reticle::before {
+      content: '+';
+      color: var(--vitrail-teal);
+      font-size: 28px;
+    }
+
+    /* Bottom Sheet Modal */
+    .bottom-sheet {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: var(--heritage-blue);
+      border-top: 3px solid var(--antique-gold);
+      border-radius: 24px 24px 0 0;
+      padding: 20px 24px;
+      color: var(--silk-cream);
+      box-shadow: 0 -10px 30px rgba(0,0,0,0.5);
+      backdrop-filter: blur(12px);
+    }
+
+    .sheet-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .category {
+      font-size: 11px;
+      color: var(--antique-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: bold;
+    }
+
+    .title {
+      font-size: 17px;
+      font-weight: 600;
+      margin-top: 2px;
+      color: var(--silk-cream);
+    }
+
+    .close-btn {
+      background: rgba(255,255,255,0.1);
+      border: none;
+      color: var(--silk-cream);
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    /* Audio Player Controls */
+    .audio-player {
+      margin-top: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .play-btn {
+      background: var(--terracotta);
+      border: none;
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 16px;
+      box-shadow: 0 4px 10px rgba(163, 56, 39, 0.4);
+    }
+
+    .progress-container {
+      flex: 1;
+    }
+
+    .progress-bar {
+      height: 5px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 6px;
+    }
+
+    .progress {
+      width: 45%;
+      height: 100%;
+      background: var(--antique-gold);
+    }
+
+    .time {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="mobile-frame">
+    <!-- Top Bar -->
+    <div class="top-bar">
+      <div class="badge">? Οδηγίες</div>
+      <div class="badge">Σημείο: 3 / 9</div>
+    </div>
+
+    <!-- Scanning Reticle -->
+    <div class="reticle"></div>
+
+    <!-- Bottom Sheet Modal (Found State) -->
+    <div class="bottom-sheet">
+      <div class="sheet-header">
+        <div>
+          <span class="category">Κοσμήματα & Παράδοση</span>
+          <h3 class="title">Χρυσό Περιδέραιο (Δικελί)</h3>
+        </div>
+        <button class="close-btn">✕</button>
+      </div>
+
+      <!-- Controls -->
+      <div class="audio-player">
+        <button class="play-btn">▶</button>
+        <div class="progress-container">
+          <div class="progress-bar">
+            <div class="progress"></div>
+          </div>
+          <div class="time">
+            <span>0:42</span>
+            <span>1:30</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</body>
+</html>
