@@ -5,11 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
+    <!-- Βιβλιοθήκες A-Frame & MindAR -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
       body { margin: 0; overflow: hidden; }
+      
+      /* Οθόνη Καλωσορίσματος */
       #welcomeScreen {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: rgba(15, 15, 15, 0.95); z-index: 10000;
@@ -22,31 +25,68 @@
         background-color: #28a745; color: #fff; font-size: 18px; font-weight: bold;
         padding: 16px 36px; border: none; border-radius: 40px; cursor: pointer;
       }
+      
+      /* Μπάρα Καθοδήγησης */
       #infoCard {
-        position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.85); color: #fff; padding: 12px 24px;
-        border-radius: 25px; font-family: sans-serif; font-size: 14px; text-align: center;
-        z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; gap: 12px;
+        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.88); color: #fff; padding: 14px 20px;
+        border-radius: 20px; font-family: sans-serif; font-size: 13px; text-align: center;
+        z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.25);
+        display: flex; flex-direction: column; align-items: center; gap: 8px;
+        max-width: 90vw; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       }
+      
+      #cardHeader {
+        display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;
+      }
+
       #closeBtn {
         background-color: #dc3545; color: white; border: none; border-radius: 15px;
-        padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer; display: none;
+        padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; display: none;
+      }
+
+      /* Animation Equalizer για την Αφήγηση */
+      .sound-wave {
+        display: none; align-items: flex-end; gap: 3px; height: 16px;
+      }
+      .sound-wave span {
+        width: 3px; background-color: #28a745; animation: wave 1s infinite ease-in-out;
+      }
+      .sound-wave span:nth-child(1) { height: 60%; animation-delay: 0.1s; }
+      .sound-wave span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
+      .sound-wave span:nth-child(3) { height: 40%; animation-delay: 0.2s; }
+      .sound-wave span:nth-child(4) { height: 80%; animation-delay: 0.4s; }
+
+      @keyframes wave {
+        0%, 100% { transform: scaleY(0.4); }
+        50% { transform: scaleY(1); }
       }
     </style>
   </head>
   <body>
 
+    <!-- Οθόνη Καλωσορίσματος -->
     <div id="welcomeScreen">
       <h1>Refugee Museum AR</h1>
       <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς οποιοδήποτε έκθεμα.</p>
       <button id="startBtn">▶ Έναρξη Εμπειρίας</button>
     </div>
 
+    <!-- Μπάρα Καθοδήγησης -->
     <div id="infoCard">
-      <span id="infoText">Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.</span>
-      <button id="closeBtn">Επόμενο ✕</button>
+      <div id="cardHeader">
+        <div style="display: flex; align-items: center; gap: 8px;">
+          <div class="sound-wave" id="soundWave">
+            <span></span><span></span><span></span><span></span>
+          </div>
+          <span id="infoTitle" style="font-weight: bold;">Αναζήτηση εκθέματος...</span>
+        </div>
+        <button id="closeBtn">Επόμενο ✕</button>
+      </div>
+      <span id="infoText" style="color: #ccc; line-height: 1.3;">Στρέψτε την κάμερα στο σύμβολο.</span>
     </div>
 
+    <!-- Σκηνή AR -->
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
       color-space="sRGB" 
@@ -54,6 +94,7 @@
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
+      <!-- Προφόρτωση βίντεο στα assets -->
       <a-assets>
         <video id="videoPappous" src="pappous_v5.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPoulos" src="poulos.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
@@ -61,17 +102,20 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
+      <!-- Έκθεμα 1: Η Νέα Ζωή (targetIndex: 0) -->
       <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
 
-      <!-- 9:16 αναλογία (width 1.2, height 2.13) -->
+      <!-- Έκθεμα 2: Παππούς (targetIndex: 1) -->
       <a-entity mindar-image-target="targetIndex: 1" id="pappous">
-        <a-video src="#videoPappous" width="1.2" height="2.13" position="0 0 0"></a-video>
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
+      <!-- Έκθεμα 3: Πούλος (targetIndex: 2) -->
       <a-entity mindar-image-target="targetIndex: 2" id="poulos">
-        <a-video src="#videoPoulos" width="1.2" height="2.13" position="0 0 0"></a-video>
+        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
+      <!-- Υπόλοιπα Εκθέματα -->
       <a-entity mindar-image-target="targetIndex: 3" id="raptomihani"></a-entity>
       <a-entity mindar-image-target="targetIndex: 4" id="smirni"></a-entity>
       <a-entity mindar-image-target="targetIndex: 5" id="vaptisi"></a-entity>
@@ -84,8 +128,10 @@
     <script>
       const welcomeScreen = document.getElementById('welcomeScreen');
       const startBtn = document.getElementById('startBtn');
+      const infoTitle = document.getElementById('infoTitle');
       const infoText = document.getElementById('infoText');
       const closeBtn = document.getElementById('closeBtn');
+      const soundWave = document.getElementById('soundWave');
       const sceneEl = document.querySelector('a-scene');
 
       const targetPappous = document.querySelector('#pappous');
@@ -94,9 +140,12 @@
       const videoPappous = document.querySelector('#videoPappous');
       const videoPoulos = document.querySelector('#videoPoulos');
 
-      // Μεταβλητές που ελέγχουν αν παίζει ήδη κάποιο βίντεο
+      const arVideoPappous = document.querySelector('#arVideoPappous');
+      const arVideoPoulos = document.querySelector('#arVideoPoulos');
+
       let isPlaying = false;
 
+      // Έναρξη AR
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
         [videoPappous, videoPoulos].forEach(v => {
@@ -105,40 +154,29 @@
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // Εντοπισμός: Παππούς
+      // 1. Εντοπισμός: Παππούς (targetIndex: 1)
       targetPappous.addEventListener("targetFound", () => {
         if (!isPlaying) {
           isPlaying = true;
-          infoText.innerText = "Έκθεμα: Παππούς";
+          infoTitle.innerText = "Έκθεμα: Παππούς";
+          infoText.innerText = "Παρακολουθήστε το βίντεο στην οθόνη.";
           closeBtn.style.display = "inline-block";
           videoPappous.play();
         }
       });
 
-      // Εντοπισμός: Πούλος
+      // 2. Εντοπισμός: Πούλος (targetIndex: 2)
       targetPoulos.addEventListener("targetFound", () => {
         if (!isPlaying) {
           isPlaying = true;
-          infoText.innerText = "Έκθεμα: Πούλος";
+          infoTitle.innerText = "Έκθεμα: Πούλος";
+          infoText.innerText = "Παρακολουθήστε το βίντεο στην οθόνη.";
           closeBtn.style.display = "inline-block";
           videoPoulos.play();
         }
       });
 
-      // Κουμπί επαναφοράς "Επόμενο ✕"
-      closeBtn.addEventListener('click', () => {
-        stopAllVideos();
-        isPlaying = false;
-        closeBtn.style.display = "none";
-        infoText.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
-      });
-
-      function stopAllVideos() {
-        [videoPappous, videoPoulos].forEach(v => { 
-          v.pause(); 
-          v.currentTime = 0; 
-        });
-      }
-    </script>
-  </body>
-</html>
+      // Παρακολούθηση του βίντεο του Παππού για το σημείο 00:55 και την παύση 6 δευτερολέπτων
+      videoPappous.addEventListener('timeupdate', () => {
+        if (videoPappous.currentTime >= 55) {
+          arVideoPappous.setAttribute('visible', 'false'); // Κρύβει το βίντεο AR
