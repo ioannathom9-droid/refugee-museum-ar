@@ -217,4 +217,38 @@
         if (currentTime >= 55 && currentTime < 61) {
           arVideoPappous.setAttribute('visible', 'false');
           centerOverlay.style.display = 'flex'; // Εμφάνιση μεγάλου κειμένου στο κέντρο
-          soundWave.style.display =
+          soundWave.style.display = 'none';
+          infoTitle.innerText = "🔊 Οδηγία Ξενάγησης";
+        }
+        // Στο 01:01 (61s): Εξαφανίζεται το κεντρικό κείμενο και ξεκινάει το Equalizer στη μπάρα
+        else if (currentTime >= 61) {
+          centerOverlay.style.display = 'none'; // Απόκρυψη κεντρικής κάρτας
+          soundWave.style.display = 'flex';     // Ενεργοποίηση equalizer
+          infoTitle.innerText = "🔊 Αφήγηση σε εξέλιξη";
+        }
+      });
+
+      // Κουμπί επαναφοράς "Επόμενο ✕"
+      closeBtn.addEventListener('click', () => {
+        stopAllVideos();
+        isPlaying = false;
+        closeBtn.style.display = "none";
+        soundWave.style.display = 'none';
+        centerOverlay.style.display = 'none';
+        
+        // Επαναφορά ορατότητας βίντεο AR
+        arVideoPappous.setAttribute('visible', 'true');
+        arVideoPoulos.setAttribute('visible', 'true');
+
+        infoTitle.innerText = "Αναζήτηση εκθέματος...";
+      });
+
+      function stopAllVideos() {
+        [videoPappous, videoPoulos].forEach(v => { 
+          v.pause(); 
+          v.currentTime = 0; 
+        });
+      }
+    </script>
+  </body>
+</html>
