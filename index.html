@@ -63,14 +63,13 @@
 
       <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
 
-      <!-- Παππούς: 9:16 αναλογία αλλά σε διπλάσιο μέγεθος (width 1.8, height 3.2) για να φαίνεται μεγάλο -->
+      <!-- 9:16 αναλογία (width 1.2, height 2.13) -->
       <a-entity mindar-image-target="targetIndex: 1" id="pappous">
-        <a-video src="#videoPappous" width="1.8" height="3.2" position="0 0 0"></a-video>
+        <a-video src="#videoPappous" width="1.2" height="2.13" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- Πούλος: 9:16 αναλογία αλλά σε διπλάσιο μέγεθος (width 1.8, height 3.2) -->
       <a-entity mindar-image-target="targetIndex: 2" id="poulos">
-        <a-video src="#videoPoulos" width="1.8" height="3.2" position="0 0 0"></a-video>
+        <a-video src="#videoPoulos" width="1.2" height="2.13" position="0 0 0"></a-video>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 3" id="raptomihani"></a-entity>
@@ -95,7 +94,8 @@
       const videoPappous = document.querySelector('#videoPappous');
       const videoPoulos = document.querySelector('#videoPoulos');
 
-      let currentActiveVideo = null;
+      // Μεταβλητές που ελέγχουν αν παίζει ήδη κάποιο βίντεο
+      let isPlaying = false;
 
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
@@ -105,31 +105,39 @@
         sceneEl.systems["mindar-image-system"].start();
       });
 
+      // Εντοπισμός: Παππούς
       targetPappous.addEventListener("targetFound", () => {
-        stopAllVideos();
-        infoText.innerText = "Έκθεμα: Παππούς";
-        closeBtn.style.display = "inline-block";
-        videoPappous.play();
-        currentActiveVideo = videoPappous;
+        if (!isPlaying) {
+          isPlaying = true;
+          infoText.innerText = "Έκθεμα: Παππούς";
+          closeBtn.style.display = "inline-block";
+          videoPappous.play();
+        }
       });
 
+      // Εντοπισμός: Πούλος
       targetPoulos.addEventListener("targetFound", () => {
-        stopAllVideos();
-        infoText.innerText = "Έκθεμα: Πούλος";
-        closeBtn.style.display = "inline-block";
-        videoPoulos.play();
-        currentActiveVideo = videoPoulos;
+        if (!isPlaying) {
+          isPlaying = true;
+          infoText.innerText = "Έκθεμα: Πούλος";
+          closeBtn.style.display = "inline-block";
+          videoPoulos.play();
+        }
       });
 
+      // Κουμπί επαναφοράς "Επόμενο ✕"
       closeBtn.addEventListener('click', () => {
         stopAllVideos();
+        isPlaying = false;
         closeBtn.style.display = "none";
         infoText.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
       });
 
       function stopAllVideos() {
-        [videoPappous, videoPoulos].forEach(v => { v.pause(); v.currentTime = 0; });
-        currentActiveVideo = null;
+        [videoPappous, videoPoulos].forEach(v => { 
+          v.pause(); 
+          v.currentTime = 0; 
+        });
       }
     </script>
   </body>
