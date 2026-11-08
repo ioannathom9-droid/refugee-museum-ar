@@ -5,117 +5,55 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Refugee Museum AR</title>
 
-    <!-- Βιβλιοθήκες A-Frame & MindAR -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-      body {
-        margin: 0;
-        overflow: hidden;
-      }
-
-      /* Οθόνη Καλωσορίσματος */
+      body { margin: 0; overflow: hidden; }
       #welcomeScreen {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        background-color: rgba(15, 15, 15, 0.95);
-        z-index: 10000;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        text-align: center;
-        padding: 25px;
-        box-sizing: border-box;
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-color: rgba(15, 15, 15, 0.95); z-index: 10000;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        text-align: center; padding: 25px; box-sizing: border-box;
       }
-      #welcomeScreen h1 {
-        color: #ffffff;
-        font-family: sans-serif;
-        font-size: 22px;
-        margin-bottom: 15px;
-      }
-      #welcomeScreen p {
-        color: #dddddd;
-        font-family: sans-serif;
-        font-size: 15px;
-        line-height: 1.5;
-        max-width: 400px;
-        margin-bottom: 25px;
-      }
+      #welcomeScreen h1 { color: #fff; font-family: sans-serif; font-size: 22px; margin-bottom: 15px; }
+      #welcomeScreen p { color: #ddd; font-family: sans-serif; font-size: 15px; line-height: 1.5; max-width: 400px; margin-bottom: 25px; }
       #startBtn {
-        background-color: #28a745;
-        color: #ffffff;
-        font-size: 18px;
-        font-weight: bold;
-        padding: 16px 36px;
-        border: none;
-        border-radius: 40px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.6);
-        cursor: pointer;
+        background-color: #28a745; color: #fff; font-size: 18px; font-weight: bold;
+        padding: 16px 36px; border: none; border-radius: 40px; cursor: pointer;
       }
-
-      /* Κάρτα καθοδήγησης */
       #infoCard {
-        position: fixed;
-        bottom: 25px;
-        left: 50%;
-        transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.85);
-        color: #ffffff;
-        padding: 12px 24px;
-        border-radius: 25px;
-        font-family: sans-serif;
-        font-size: 14px;
-        text-align: center;
-        z-index: 9999;
-        border: 1px solid rgba(255, 255, 255, 0.25);
-        display: flex;
-        align-items: center;
-        gap: 12px;
+        position: fixed; bottom: 25px; left: 50%; transform: translateX(-50%);
+        background-color: rgba(0, 0, 0, 0.85); color: #fff; padding: 12px 24px;
+        border-radius: 25px; font-family: sans-serif; font-size: 14px; text-align: center;
+        z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.25); display: flex; align-items: center; gap: 12px;
       }
-
-      /* Κουμπί επαναφοράς / επόμενου εκθέματος */
       #closeBtn {
-        background-color: #dc3545;
-        color: white;
-        border: none;
-        border-radius: 15px;
-        padding: 6px 14px;
-        font-size: 13px;
-        font-weight: bold;
-        cursor: pointer;
-        display: none;
+        background-color: #dc3545; color: white; border: none; border-radius: 15px;
+        padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer; display: none;
       }
     </style>
   </head>
   <body>
 
-    <!-- Οθόνη Καλωσορίσματος -->
     <div id="welcomeScreen">
       <h1>Refugee Museum AR</h1>
       <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς οποιοδήποτε έκθεμα.</p>
       <button id="startBtn">▶ Έναρξη Εμπειρίας</button>
     </div>
 
-    <!-- Μπάρα Καθοδήγησης & Κουμπί Επόμενου -->
     <div id="infoCard">
       <span id="infoText">Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.</span>
       <button id="closeBtn">Επόμενο ✕</button>
     </div>
 
-    <!-- Σκηνή AR -->
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
       color-space="sRGB" 
-      renderer="colorManagement: true, physicallyCorrectLights" 
+      renderer="colorManagement: true" 
       vr-mode-ui="enabled: false" 
       device-orientation-permission-ui="enabled: false">
       
-      <!-- Προφόρτωση βίντεο στα assets -->
       <a-assets>
         <video id="videoPappous" src="pappous_v5.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPoulos" src="poulos.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
@@ -123,22 +61,18 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Έκθεμα 1: Η Νέα Ζωή (targetIndex: 0) -->
       <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
 
-      <!-- Έκθεμα 2: Παππούς (targetIndex: 1) -->
+      <!-- Παππούς: 9:16 αναλογία αλλά σε διπλάσιο μέγεθος (width 1.8, height 3.2) για να φαίνεται μεγάλο -->
       <a-entity mindar-image-target="targetIndex: 1" id="pappous">
-        <!-- Αυξήσαμε το πλάτος (width: 1.4) για να φαίνεται μεγάλο και καθαρό χωρίς μαύρες μπάρες -->
-        <a-video src="#videoPappous" width="1.4" height="0.8" position="0 0 0" rotation="0 0 0"></a-video>
+        <a-video src="#videoPappous" width="1.8" height="3.2" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- Έκθεμα 3: Πούλος (targetIndex: 2) -->
+      <!-- Πούλος: 9:16 αναλογία αλλά σε διπλάσιο μέγεθος (width 1.8, height 3.2) -->
       <a-entity mindar-image-target="targetIndex: 2" id="poulos">
-        <!-- Αυξήσαμε το πλάτος (width: 1.4) για να φαίνεται μεγάλο και καθαρό χωρίς μαύρες μπάρες -->
-        <a-video src="#videoPoulos" width="1.4" height="0.8" position="0 0 0" rotation="0 0 0"></a-video>
+        <a-video src="#videoPoulos" width="1.8" height="3.2" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- Υπόλοιπα Εκθέματα -->
       <a-entity mindar-image-target="targetIndex: 3" id="raptomihani"></a-entity>
       <a-entity mindar-image-target="targetIndex: 4" id="smirni"></a-entity>
       <a-entity mindar-image-target="targetIndex: 5" id="vaptisi"></a-entity>
@@ -161,55 +95,41 @@
       const videoPappous = document.querySelector('#videoPappous');
       const videoPoulos = document.querySelector('#videoPoulos');
 
-      let isVideoActive = false;
+      let currentActiveVideo = null;
 
-      // Έναρξη AR & "Ξεκλείδωμα" ήχου/βίντεο για κινητά
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
-
         [videoPappous, videoPoulos].forEach(v => {
-          v.play().then(() => {
-            v.pause();
-            v.currentTime = 0;
-          }).catch(err => console.warn("Video unlock notice:", err));
+          v.play().then(() => { v.pause(); v.currentTime = 0; }).catch(err => console.warn(err));
         });
-
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // 1. Εντοπισμός: Παππούς
       targetPappous.addEventListener("targetFound", () => {
-        if (!isVideoActive) {
-          isVideoActive = true;
-          infoText.innerText = "Έκθεμα: Παππούς";
-          closeBtn.style.display = "inline-block";
-          videoPappous.play();
-        }
+        stopAllVideos();
+        infoText.innerText = "Έκθεμα: Παππούς";
+        closeBtn.style.display = "inline-block";
+        videoPappous.play();
+        currentActiveVideo = videoPappous;
       });
 
-      // 2. Εντοπισμός: Πούλος
       targetPoulos.addEventListener("targetFound", () => {
-        if (!isVideoActive) {
-          isVideoActive = true;
-          infoText.innerText = "Έκθεμα: Πούλος";
-          closeBtn.style.display = "inline-block";
-          videoPoulos.play();
-        }
+        stopAllVideos();
+        infoText.innerText = "Έκθεμα: Πούλος";
+        closeBtn.style.display = "inline-block";
+        videoPoulos.play();
+        currentActiveVideo = videoPoulos;
       });
 
-      // Κουμπί επαναφοράς "Επόμενο ✕" - Μόνο όταν πατηθεί αυτό σταματάει το βίντεο!
       closeBtn.addEventListener('click', () => {
         stopAllVideos();
-        isVideoActive = false;
         closeBtn.style.display = "none";
         infoText.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
       });
 
       function stopAllVideos() {
-        [videoPappous, videoPoulos].forEach(v => {
-          v.pause();
-          v.currentTime = 0;
-        });
+        [videoPappous, videoPoulos].forEach(v => { v.pause(); v.currentTime = 0; });
+        currentActiveVideo = null;
       }
     </script>
   </body>
