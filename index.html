@@ -26,23 +26,55 @@
         padding: 16px 36px; border: none; border-radius: 40px; cursor: pointer;
       }
       
-      /* Μπάρα Καθοδήγησης */
+      /* Μπάρα Καθοδήγησης στο κάτω μέρος */
       #infoCard {
         position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.88); color: #fff; padding: 14px 20px;
+        background-color: rgba(0, 0, 0, 0.88); color: #fff; padding: 12px 20px;
         border-radius: 20px; font-family: sans-serif; font-size: 13px; text-align: center;
         z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.25);
-        display: flex; flex-direction: column; align-items: center; gap: 8px;
-        max-width: 90vw; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      }
-      
-      #cardHeader {
-        display: flex; align-items: center; justify-content: space-between; width: 100%; gap: 10px;
+        display: flex; align-items: center; justify-content: space-between; gap: 12px;
+        width: 85vw; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
       }
 
       #closeBtn {
         background-color: #dc3545; color: white; border: none; border-radius: 15px;
         padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; display: none;
+      }
+
+      /* ΜΕΓΑΛΟ ΚΕΝΤΡΙΚΟ ΠΛΑΙΣΙΟ ΟΔΗΓΙΑΣ (00:55 - 01:01) */
+      #centerInstructionOverlay {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 85vw;
+        max-width: 420px;
+        background-color: rgba(0, 0, 0, 0.92);
+        color: #ffffff;
+        padding: 25px 20px;
+        border-radius: 25px;
+        font-family: sans-serif;
+        text-align: center;
+        z-index: 9998;
+        border: 2px solid #28a745;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        display: none; /* Αρχικά κρυφό */
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+      }
+
+      #centerInstructionOverlay h2 {
+        color: #28a745;
+        font-size: 20px;
+        margin: 0 0 15px 0;
+      }
+
+      #centerInstructionOverlay p {
+        font-size: 17px;
+        line-height: 1.5;
+        margin: 0;
+        font-weight: 500;
       }
 
       /* Animation Equalizer για την Αφήγηση */
@@ -72,18 +104,21 @@
       <button id="startBtn">▶ Έναρξη Εμπειρίας</button>
     </div>
 
-    <!-- Μπάρα Καθοδήγησης -->
+    <!-- Μεγάλη Κεντρική Οδηγία (00:55) -->
+    <div id="centerInstructionOverlay">
+      <h2>👁️ Σημείο Εστίασης</h2>
+      <p>Αφήστε για λίγο την οθόνη...<br><br>Ακούγοντας τη συνέχεια της ιστορίας μας, <strong>κοιτάξτε μπροστά σας</strong> για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής!</p>
+    </div>
+
+    <!-- Μπάρα Καθοδήγησης (Κάτω μέρος) -->
     <div id="infoCard">
-      <div id="cardHeader">
-        <div style="display: flex; align-items: center; gap: 8px;">
-          <div class="sound-wave" id="soundWave">
-            <span></span><span></span><span></span><span></span>
-          </div>
-          <span id="infoTitle" style="font-weight: bold;">Αναζήτηση εκθέματος...</span>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <div class="sound-wave" id="soundWave">
+          <span></span><span></span><span></span><span></span>
         </div>
-        <button id="closeBtn">Επόμενο ✕</button>
+        <span id="infoTitle" style="font-weight: bold;">Αναζήτηση εκθέματος...</span>
       </div>
-      <span id="infoText" style="color: #ccc; line-height: 1.3;">Στρέψτε την κάμερα στο σύμβολο.</span>
+      <button id="closeBtn">Επόμενο ✕</button>
     </div>
 
     <!-- Σκηνή AR -->
@@ -129,9 +164,9 @@
       const welcomeScreen = document.getElementById('welcomeScreen');
       const startBtn = document.getElementById('startBtn');
       const infoTitle = document.getElementById('infoTitle');
-      const infoText = document.getElementById('infoText');
       const closeBtn = document.getElementById('closeBtn');
       const soundWave = document.getElementById('soundWave');
+      const centerOverlay = document.getElementById('centerInstructionOverlay');
       const sceneEl = document.querySelector('a-scene');
 
       const targetPappous = document.querySelector('#pappous');
@@ -159,7 +194,6 @@
         if (!isPlaying) {
           isPlaying = true;
           infoTitle.innerText = "Έκθεμα: Παππούς";
-          infoText.innerText = "Παρακολουθήστε το βίντεο στην οθόνη.";
           closeBtn.style.display = "inline-block";
           videoPappous.play();
         }
@@ -170,51 +204,17 @@
         if (!isPlaying) {
           isPlaying = true;
           infoTitle.innerText = "Έκθεμα: Πούλος";
-          infoText.innerText = "Παρακολουθήστε το βίντεο στην οθόνη.";
           closeBtn.style.display = "inline-block";
           videoPoulos.play();
         }
       });
 
-      // Παρακολούθηση του βίντεο του Παππού για το σημείο 00:55 και την παύση 6 δευτερολέπτων
+      // Διαχείριση χρονισμού για το βίντεο του Παππού
       videoPappous.addEventListener('timeupdate', () => {
-        if (videoPappous.currentTime >= 55) {
-          arVideoPappous.setAttribute('visible', 'false'); // Κρύβει το βίντεο AR
-          
-          infoTitle.innerText = "🔊 Οδηγία Ξενάγησης";
-          infoText.innerHTML = "Αφήστε για λίγο την οθόνη...<br>Ακούγοντας τη συνέχεια της ιστορίας μας, κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής!";
+        const currentTime = videoPappous.currentTime;
 
-          // Στο 01:01 (61 δευτερόλεπτα) τελειώνει η παύση των 6s και ξεκινάει πάλι η φωνή
-          if (videoPappous.currentTime >= 61) {
-            soundWave.style.display = 'flex'; // Εμφανίζει το πράσινο κύμα ήχου
-            infoTitle.innerText = "🔊 Αφήγηση σε εξέλιξη";
-          } else {
-            soundWave.style.display = 'none'; // Κατά τα 6s σιωπής το equalizer παραμένει κρυφό
-          }
-        }
-      });
-
-      // Κουμπί επαναφοράς "Επόμενο ✕"
-      closeBtn.addEventListener('click', () => {
-        stopAllVideos();
-        isPlaying = false;
-        closeBtn.style.display = "none";
-        soundWave.style.display = 'none';
-        
-        // Επαναφορά ορατότητας βίντεο AR
-        arVideoPappous.setAttribute('visible', 'true');
-        arVideoPoulos.setAttribute('visible', 'true');
-
-        infoTitle.innerText = "Αναζήτηση εκθέματος...";
-        infoText.innerText = "Στρέψτε την κάμερα στο σύμβολο.";
-      });
-
-      function stopAllVideos() {
-        [videoPappous, videoPoulos].forEach(v => { 
-          v.pause(); 
-          v.currentTime = 0; 
-        });
-      }
-    </script>
-  </body>
-</html>
+        // Στο 00:55 (55s): Κρύβεται το βίντεο και εμφανίζεται η ΜΕΓΑΛΗ κεντρική κάρτα
+        if (currentTime >= 55 && currentTime < 61) {
+          arVideoPappous.setAttribute('visible', 'false');
+          centerOverlay.style.display = 'flex'; // Εμφάνιση μεγάλου κειμένου στο κέντρο
+          soundWave.style.display =
