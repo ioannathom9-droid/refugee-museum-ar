@@ -1,4 +1,33 @@
+<!DOCTYPE html>
+<html lang="el">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Refugee Museum AR</title>
 
+    <!-- Βιβλιοθήκες A-Frame & MindAR -->
+    <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
+
+    <style>
+      body {
+        margin: 0;
+        overflow: hidden;
+      }
+
+      /* Οθόνη Καλωσορίσματος */
+      #welcomeScreen {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(15, 15, 15, 0.95);
+        z-index: 10000;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
         text-align: center;
         padding: 25px;
         box-sizing: border-box;
@@ -55,8 +84,8 @@
         color: white;
         border: none;
         border-radius: 15px;
-        padding: 5px 12px;
-        font-size: 12px;
+        padding: 6px 14px;
+        font-size: 13px;
         font-weight: bold;
         cursor: pointer;
         display: none;
@@ -99,12 +128,14 @@
 
       <!-- Έκθεμα 2: Παππούς (targetIndex: 1) -->
       <a-entity mindar-image-target="targetIndex: 1" id="pappous">
-        <a-video src="#videoPappous" width="0.5625" height="1" position="0 0 0" rotation="0 0 0"></a-video>
+        <!-- Αυξήσαμε το πλάτος (width: 1.4) για να φαίνεται μεγάλο και καθαρό χωρίς μαύρες μπάρες -->
+        <a-video src="#videoPappous" width="1.4" height="0.8" position="0 0 0" rotation="0 0 0"></a-video>
       </a-entity>
 
       <!-- Έκθεμα 3: Πούλος (targetIndex: 2) -->
       <a-entity mindar-image-target="targetIndex: 2" id="poulos">
-        <a-video src="#videoPoulos" width="0.5625" height="1" position="0 0 0" rotation="0 0 0"></a-video>
+        <!-- Αυξήσαμε το πλάτος (width: 1.4) για να φαίνεται μεγάλο και καθαρό χωρίς μαύρες μπάρες -->
+        <a-video src="#videoPoulos" width="1.4" height="0.8" position="0 0 0" rotation="0 0 0"></a-video>
       </a-entity>
 
       <!-- Υπόλοιπα Εκθέματα -->
@@ -130,7 +161,7 @@
       const videoPappous = document.querySelector('#videoPappous');
       const videoPoulos = document.querySelector('#videoPoulos');
 
-      let currentActiveVideo = null;
+      let isVideoActive = false;
 
       // Έναρξη AR & "Ξεκλείδωμα" ήχου/βίντεο για κινητά
       startBtn.addEventListener('click', () => {
@@ -148,33 +179,28 @@
 
       // 1. Εντοπισμός: Παππούς
       targetPappous.addEventListener("targetFound", () => {
-        stopAllVideos();
-        infoText.innerText = "Έκθεμα: Παππούς";
-        closeBtn.style.display = "inline-block";
-        videoPappous.play();
-        currentActiveVideo = videoPappous;
-      });
-
-      targetPappous.addEventListener("targetLost", () => {
-        videoPappous.pause();
+        if (!isVideoActive) {
+          isVideoActive = true;
+          infoText.innerText = "Έκθεμα: Παππούς";
+          closeBtn.style.display = "inline-block";
+          videoPappous.play();
+        }
       });
 
       // 2. Εντοπισμός: Πούλος
       targetPoulos.addEventListener("targetFound", () => {
-        stopAllVideos();
-        infoText.innerText = "Έκθεμα: Πούλος";
-        closeBtn.style.display = "inline-block";
-        videoPoulos.play();
-        currentActiveVideo = videoPoulos;
+        if (!isVideoActive) {
+          isVideoActive = true;
+          infoText.innerText = "Έκθεμα: Πούλος";
+          closeBtn.style.display = "inline-block";
+          videoPoulos.play();
+        }
       });
 
-      targetPoulos.addEventListener("targetLost", () => {
-        videoPoulos.pause();
-      });
-
-      // Κουμπί επαναφοράς "Επόμενο"
+      // Κουμπί επαναφοράς "Επόμενο ✕" - Μόνο όταν πατηθεί αυτό σταματάει το βίντεο!
       closeBtn.addEventListener('click', () => {
         stopAllVideos();
+        isVideoActive = false;
         closeBtn.style.display = "none";
         infoText.innerText = "Αναζήτηση εκθέματος... Στρέψτε την κάμερα στο σύμβολο.";
       });
@@ -184,7 +210,6 @@
           v.pause();
           v.currentTime = 0;
         });
-        currentActiveVideo = null;
       }
     </script>
   </body>
