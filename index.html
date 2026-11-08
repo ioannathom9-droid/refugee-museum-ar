@@ -180,3 +180,41 @@
       videoPappous.addEventListener('timeupdate', () => {
         if (videoPappous.currentTime >= 55) {
           arVideoPappous.setAttribute('visible', 'false'); // Κρύβει το βίντεο AR
+          
+          infoTitle.innerText = "🔊 Οδηγία Ξενάγησης";
+          infoText.innerHTML = "Αφήστε για λίγο την οθόνη...<br>Ακούγοντας τη συνέχεια της ιστορίας μας, κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής!";
+
+          // Στο 01:01 (61 δευτερόλεπτα) τελειώνει η παύση των 6s και ξεκινάει πάλι η φωνή
+          if (videoPappous.currentTime >= 61) {
+            soundWave.style.display = 'flex'; // Εμφανίζει το πράσινο κύμα ήχου
+            infoTitle.innerText = "🔊 Αφήγηση σε εξέλιξη";
+          } else {
+            soundWave.style.display = 'none'; // Κατά τα 6s σιωπής το equalizer παραμένει κρυφό
+          }
+        }
+      });
+
+      // Κουμπί επαναφοράς "Επόμενο ✕"
+      closeBtn.addEventListener('click', () => {
+        stopAllVideos();
+        isPlaying = false;
+        closeBtn.style.display = "none";
+        soundWave.style.display = 'none';
+        
+        // Επαναφορά ορατότητας βίντεο AR
+        arVideoPappous.setAttribute('visible', 'true');
+        arVideoPoulos.setAttribute('visible', 'true');
+
+        infoTitle.innerText = "Αναζήτηση εκθέματος...";
+        infoText.innerText = "Στρέψτε την κάμερα στο σύμβολο.";
+      });
+
+      function stopAllVideos() {
+        [videoPappous, videoPoulos].forEach(v => { 
+          v.pause(); 
+          v.currentTime = 0; 
+        });
+      }
+    </script>
+  </body>
+</html>
