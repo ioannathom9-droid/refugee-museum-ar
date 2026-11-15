@@ -137,15 +137,30 @@
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Έκθεμα: Παππούς (Αν δεν το βρίσκει, δοκίμασε targetIndex: 0 ή 1 ανάλογα με τη σειρά στο targets.mind) -->
-      <a-entity mindar-image-target="targetIndex: 1" id="pappous">
+      <!-- 0: Η Νέα Ζωή -->
+      <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
+
+      <!-- 1: Ο Γάμος -->
+      <a-entity mindar-image-target="targetIndex: 1" id="gamos"></a-entity>
+
+      <!-- 2: Σμύρνη -->
+      <a-entity mindar-image-target="targetIndex: 2" id="smirni"></a-entity>
+
+      <!-- 3: Παντελή Σαλιάρη (Παππούς) -->
+      <a-entity mindar-image-target="targetIndex: 3" id="pappous">
         <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- Έκθεμα: Πούλος -->
-      <a-entity mindar-image-target="targetIndex: 2" id="poulos">
+      <!-- 4: Πούλος -->
+      <a-entity mindar-image-target="targetIndex: 4" id="poulos">
         <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
+
+      <!-- 5: Φιλία -->
+      <a-entity mindar-image-target="targetIndex: 5" id="filia"></a-entity>
+
+      <!-- 6: Ραπτομηχανή -->
+      <a-entity mindar-image-target="targetIndex: 6" id="raptomihani"></a-entity>
 
     </a-scene>
 
@@ -182,7 +197,7 @@
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // 1. Εντοπισμός: Παππούς (Μόλις το βρει μια φορά, ξεκινάει και συνεχίζει ακόμα κι αν χαθεί το marker)
+      // 1. Εντοπισμός: Παππούς (Παντελής Σαλιάρης)
       targetPappous.addEventListener("targetFound", () => {
         if (!isPlaying) {
           isPlaying = true;
@@ -218,7 +233,7 @@
         }
       });
 
-      // Κουμπί επαναφοράς "Επόμενο ✕" (Για να κλείσει το τρέχον βίντεο και να μπορεί να σκανάρει άλλο)
+      // Κουμπί επαναφοράς "Επόμενο ✕"
       closeBtn.addEventListener('click', () => {
         stopAllVideos();
         isPlaying = false;
