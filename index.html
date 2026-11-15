@@ -41,7 +41,7 @@
         padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; display: none;
       }
 
-      /* ΜΕΓΑΛΟ ΚΕΝΤΡΙΚΟ ΠΛΑΙΣΙΟ ΟΔΗΓΙΑΣ (00:55 - 01:01) */
+      /* ΜΕΓΑΛΟ ΚΕΝΤΡΙΚΟ ΠΛΑΙΣΙΟ ΟΔΗΓΙΑΣ */
       #centerInstructionOverlay {
         position: fixed;
         top: 50%;
@@ -58,7 +58,7 @@
         z-index: 9998;
         border: 2px solid #28a745;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
-        display: none; /* Αρχικά κρυφό */
+        display: none;
         flex-direction: column;
         align-items: center;
         justify-content: center;
@@ -104,7 +104,7 @@
       <button id="startBtn">▶ Έναρξη Εμπειρίας</button>
     </div>
 
-    <!-- Μεγάλη Κεντρική Οδηγία (00:55) -->
+    <!-- Μεγάλη Κεντρική Οδηγία -->
     <div id="centerInstructionOverlay">
       <h2>👁️ Σημείο Εστίασης</h2>
       <p>Αφήστε για λίγο την οθόνη...<br><br>Ακούγοντας τη συνέχεια της ιστορίας μας, <strong>κοιτάξτε μπροστά σας</strong> για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής!</p>
@@ -131,32 +131,21 @@
       
       <!-- Προφόρτωση βίντεο στα assets -->
       <a-assets>
-        <video id="videoPappous" src="pappous_v5.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="videoPappous" src="pappous_v3.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- Έκθεμα 1: Η Νέα Ζωή (targetIndex: 0) -->
-      <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
-
-      <!-- Έκθεμα 2: Παππούς (targetIndex: 1) -->
+      <!-- Έκθεμα: Παππούς (Αν δεν το βρίσκει, δοκίμασε targetIndex: 0 ή 1 ανάλογα με τη σειρά στο targets.mind) -->
       <a-entity mindar-image-target="targetIndex: 1" id="pappous">
         <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- Έκθεμα 3: Πούλος (targetIndex: 2) -->
+      <!-- Έκθεμα: Πούλος -->
       <a-entity mindar-image-target="targetIndex: 2" id="poulos">
         <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
-
-      <!-- Υπόλοιπα Εκθέματα -->
-      <a-entity mindar-image-target="targetIndex: 3" id="raptomihani"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 4" id="smirni"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 5" id="vaptisi"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 6" id="amaltheia"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 7" id="filia"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 8" id="gamos"></a-entity>
 
     </a-scene>
 
@@ -184,28 +173,32 @@
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
         [videoPappous, videoPoulos].forEach(v => {
-          v.play().then(() => { v.pause(); v.currentTime = 0; }).catch(err => console.warn(err));
+          v.load();
+          v.play().then(() => { 
+            v.pause(); 
+            v.currentTime = 0; 
+          }).catch(err => console.warn(err));
         });
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // 1. Εντοπισμός: Παππούς (targetIndex: 1)
+      // 1. Εντοπισμός: Παππούς (Μόλις το βρει μια φορά, ξεκινάει και συνεχίζει ακόμα κι αν χαθεί το marker)
       targetPappous.addEventListener("targetFound", () => {
         if (!isPlaying) {
           isPlaying = true;
           infoTitle.innerText = "Έκθεμα: Παππούς";
           closeBtn.style.display = "inline-block";
-          videoPappous.play();
+          videoPappous.play().catch(e => console.log(e));
         }
       });
 
-      // 2. Εντοπισμός: Πούλος (targetIndex: 2)
+      // 2. Εντοπισμός: Πούλος
       targetPoulos.addEventListener("targetFound", () => {
         if (!isPlaying) {
           isPlaying = true;
           infoTitle.innerText = "Έκθεμα: Πούλος";
           closeBtn.style.display = "inline-block";
-          videoPoulos.play();
+          videoPoulos.play().catch(e => console.log(e));
         }
       });
 
@@ -213,22 +206,19 @@
       videoPappous.addEventListener('timeupdate', () => {
         const currentTime = videoPappous.currentTime;
 
-        // Στο 00:55 (55s): Κρύβεται το βίντεο και εμφανίζεται η ΜΕΓΑΛΗ κεντρική κάρτα
         if (currentTime >= 55 && currentTime < 61) {
           arVideoPappous.setAttribute('visible', 'false');
-          centerOverlay.style.display = 'flex'; // Εμφάνιση μεγάλου κειμένου στο κέντρο
+          centerOverlay.style.display = 'flex';
           soundWave.style.display = 'none';
           infoTitle.innerText = "🔊 Οδηγία Ξενάγησης";
-        }
-        // Στο 01:01 (61s): Εξαφανίζεται το κεντρικό κείμενο και ξεκινάει το Equalizer στη μπάρα
-        else if (currentTime >= 61) {
-          centerOverlay.style.display = 'none'; // Απόκρυψη κεντρικής κάρτας
-          soundWave.style.display = 'flex';     // Ενεργοποίηση equalizer
+        } else if (currentTime >= 61) {
+          centerOverlay.style.display = 'none';
+          soundWave.style.display = 'flex';
           infoTitle.innerText = "🔊 Αφήγηση σε εξέλιξη";
         }
       });
 
-      // Κουμπί επαναφοράς "Επόμενο ✕"
+      // Κουμπί επαναφοράς "Επόμενο ✕" (Για να κλείσει το τρέχον βίντεο και να μπορεί να σκανάρει άλλο)
       closeBtn.addEventListener('click', () => {
         stopAllVideos();
         isPlaying = false;
@@ -236,7 +226,6 @@
         soundWave.style.display = 'none';
         centerOverlay.style.display = 'none';
         
-        // Επαναφορά ορατότητας βίντεο AR
         arVideoPappous.setAttribute('visible', 'true');
         arVideoPoulos.setAttribute('visible', 'true');
 
