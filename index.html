@@ -3,256 +3,193 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>Refugee Museum AR</title>
+    <title>Μουσείο Προσφυγικής Μνήμης - Web AR</title>
 
     <!-- Βιβλιοθήκες A-Frame & MindAR -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
 
     <style>
-      body { margin: 0; overflow: hidden; }
+      body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: #706C62; }
       
-      /* Οθόνη Καλωσορίσματος */
+      /* Οθόνη Καλωσορίσματος (Συμβατή με το Screen 1 του Figma) */
       #welcomeScreen {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: rgba(15, 15, 15, 0.95); z-index: 10000;
+        background-color: #706C62; z-index: 10000;
         display: flex; flex-direction: column; justify-content: center; align-items: center;
         text-align: center; padding: 25px; box-sizing: border-box;
       }
-      #welcomeScreen h1 { color: #fff; font-family: sans-serif; font-size: 22px; margin-bottom: 15px; }
-      #welcomeScreen p { color: #ddd; font-family: sans-serif; font-size: 15px; line-height: 1.5; max-width: 400px; margin-bottom: 25px; }
+      .welcome-card {
+        background-color: #2D2321; border: 1px solid #C49B55; border-radius: 16px;
+        padding: 20px; width: 100%; max-width: 380px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        margin-bottom: 20px; color: #fff;
+      }
+      #welcomeScreen h1 { color: #fff; font-size: 20px; margin-bottom: 8px; }
+      #welcomeScreen p { color: #E0DCD6; font-size: 14px; line-height: 1.4; margin: 0; }
+      
       #startBtn {
-        background-color: #28a745; color: #fff; font-size: 18px; font-weight: bold;
+        background-color: #9A2B27; color: #fff; font-size: 18px; font-weight: bold;
         padding: 16px 36px; border: none; border-radius: 40px; cursor: pointer;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4); border: 1px solid #C49B55;
       }
       
-      /* Μπάρα Καθοδήγησης στο κάτω μέρος */
+      /* Κάρτα Πληροφοριών / Media Player (Πάνω από τη μπάρα) */
       #infoCard {
-        position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(0, 0, 0, 0.88); color: #fff; padding: 12px 20px;
-        border-radius: 20px; font-family: sans-serif; font-size: 13px; text-align: center;
-        z-index: 9999; border: 1px solid rgba(255, 255, 255, 0.25);
-        display: flex; align-items: center; justify-content: space-between; gap: 12px;
-        width: 85vw; max-width: 400px; box-shadow: 0 4px 20px rgba(0,0,0,0.5);
-      }
-
-      #closeBtn {
-        background-color: #dc3545; color: white; border: none; border-radius: 15px;
-        padding: 6px 14px; font-size: 12px; font-weight: bold; cursor: pointer; display: none;
-      }
-
-      /* ΜΕΓΑΛΟ ΚΕΝΤΡΙΚΟ ΠΛΑΙΣΙΟ ΟΔΗΓΙΑΣ */
-      #centerInstructionOverlay {
-        position: fixed;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 85vw;
-        max-width: 420px;
-        background-color: rgba(0, 0, 0, 0.92);
-        color: #ffffff;
-        padding: 25px 20px;
-        border-radius: 25px;
-        font-family: sans-serif;
-        text-align: center;
-        z-index: 9998;
-        border: 2px solid #28a745;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+        background-color: #2D2321; color: #fff; padding: 14px 18px;
+        border-radius: 16px; font-size: 14px; text-align: left;
+        z-index: 9999; border: 1px solid #C49B55;
+        width: 88vw; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
         display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
+      }
+      #infoCard h3 { margin: 0 0 8px 0; color: #C49B55; font-size: 16px; }
+      .player-row { display: flex; align-items: center; justify-content: space-between; }
+      #closeBtn {
+        background-color: #9A2B27; color: white; border: none; border-radius: 12px;
+        padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;
       }
 
-      #centerInstructionOverlay h2 {
-        color: #28a745;
-        font-size: 20px;
-        margin: 0 0 15px 0;
+      /* ΜΠΑΡΑ ΜΕ ΤΑ 7 ΣΗΜΕΙΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ (Ακριβώς όπως στο Figma) */
+      #bottomTray {
+        position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
+        background-color: rgba(45, 35, 33, 0.95); padding: 8px 12px;
+        border-radius: 20px; display: flex; align-items: center; justify-content: center;
+        gap: 8px; z-index: 9999; border: 1px solid rgba(196, 155, 85, 0.4);
+        width: 90vw; max-width: 400px; box-sizing: border-box;
+      }
+      .tray-item {
+        width: 38px; height: 38px; border-radius: 8px; background-color: #3D312E;
+        border: 1px solid #5C4B47; display: flex; align-items: center; justify-content: center;
+        font-size: 10px; color: #8C7C77; opacity: 0.4; transition: all 0.3s ease;
+      }
+      /* ΕΝΕΡΓΟ / ΣΚΑΝΑΡΙΣΜΕΝΟ ΕΙΚΟΝΙΔΙΟ (Χρυσαφένιο περίγραμμα & λάμψη από το Figma) */
+      .tray-item.active {
+        opacity: 1; border: 2px solid #C49B55; color: #C49B55; background-color: #2D2321;
+        box-shadow: 0 0 10px rgba(196, 155, 85, 0.7);
       }
 
-      #centerInstructionOverlay p {
-        font-size: 17px;
-        line-height: 1.5;
-        margin: 0;
-        font-weight: 500;
+      /* ΚΕΝΤΡΙΚΟ ΤΕΤΡΑΓΩΝΟ ΣΑΡΩΣΗΣ (Reticle) */
+      #scanReticle {
+        position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
+        width: 240px; height: 240px; border: 2px solid #C49B55; border-radius: 20px;
+        pointer-events: none; z-index: 9990; box-shadow: 0 0 20px rgba(196, 155, 85, 0.2);
+        display: none;
       }
-
-      /* Animation Equalizer για την Αφήγηση */
-      .sound-wave {
-        display: none; align-items: flex-end; gap: 3px; height: 16px;
-      }
-      .sound-wave span {
-        width: 3px; background-color: #28a745; animation: wave 1s infinite ease-in-out;
-      }
-      .sound-wave span:nth-child(1) { height: 60%; animation-delay: 0.1s; }
-      .sound-wave span:nth-child(2) { height: 100%; animation-delay: 0.3s; }
-      .sound-wave span:nth-child(3) { height: 40%; animation-delay: 0.2s; }
-      .sound-wave span:nth-child(4) { height: 80%; animation-delay: 0.4s; }
-
-      @keyframes wave {
-        0%, 100% { transform: scaleY(0.4); }
-        50% { transform: scaleY(1); }
+      #scanText {
+        position: fixed; top: calc(45% + 135px); left: 50%; transform: translateX(-50%);
+        color: #fff; background: rgba(0,0,0,0.7); padding: 6px 14px; border-radius: 20px;
+        font-size: 13px; z-index: 9990; border: 1px solid rgba(196,155,85,0.3);
+        display: none;
       }
     </style>
   </head>
   <body>
 
-    <!-- Οθόνη Καλωσορίσματος -->
+    <!-- Οθόνη Καλωσορίσματος (Figma Onboarding) -->
     <div id="welcomeScreen">
-      <h1>Refugee Museum AR</h1>
-      <p>Καλώς ήρθατε στην ψηφιακή εμπειρία της έκθεσης.<br><br>Πατήστε Έναρξη και στρέψτε την κάμερα προς οποιοδήποτε έκθεμα.</p>
-      <button id="startBtn">▶ Έναρξη Εμπειρίας</button>
-    </div>
-
-    <!-- Μεγάλη Κεντρική Οδηγία -->
-    <div id="centerInstructionOverlay">
-      <h2>👁️ Σημείο Εστίασης</h2>
-      <p>Αφήστε για λίγο την οθόνη...<br><br>Ακούγοντας τη συνέχεια της ιστορίας μας, <strong>κοιτάξτε μπροστά σας</strong> για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής!</p>
-    </div>
-
-    <!-- Μπάρα Καθοδήγησης (Κάτω μέρος) -->
-    <div id="infoCard">
-      <div style="display: flex; align-items: center; gap: 8px;">
-        <div class="sound-wave" id="soundWave">
-          <span></span><span></span><span></span><span></span>
-        </div>
-        <span id="infoTitle" style="font-weight: bold;">Αναζήτηση εκθέματος...</span>
+      <div class="welcome-card">
+        <h1>Μουσείο Προσφυγικής Μνήμης</h1>
+        <p>Ψηφιακός Οδηγός AR<br><br>Εξερευνήστε ελεύθερα τα 7 εκθέματα. Στρέψτε την κάμερα στους δείκτες.</p>
       </div>
-      <button id="closeBtn">Επόμενο ✕</button>
+      <button id="startBtn">Έναρξη Εμπειρίας AR</button>
     </div>
 
-    <!-- Σκηνή AR -->
+    <!-- Στόχος Σάρωσης (Reticle) στην κάμερα -->
+    <div id="scanReticle"></div>
+    <div id="scanText">Στρέψτε την κάμερα σε ένα από τα 7 εκθέματα</div>
+
+    <!-- Κάρτα Πληροφοριών που εμφανίζεται μόλις σκανάρει -->
+    <div id="infoCard">
+      <h3 id="infoTitle">Θάνος Πούλος</h3>
+      <div class="player-row">
+        <span style="font-size: 12px; color: #ccc;">▶ Αφήγηση σε εξέλιξη...</span>
+        <button id="closeBtn">Επόμενο ✕</button>
+      </div>
+    </div>
+
+    <!-- ΜΠΑΡΑ ΜΕ ΤΑ 7 ΣΗΜΕΙΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ -->
+    <div id="bottomTray">
+      <div class="tray-item" id="tray-0">1</div>
+      <div class="tray-item" id="tray-1">2</div>
+      <div class="tray-item" id="tray-2">3</div>
+      <div class="tray-item" id="tray-3">4</div>
+      <div class="tray-item active" id="tray-4">Πούλος</div> <!-- Παράδειγμα ενεργού -->
+      <div class="tray-item" id="tray-5">6</div>
+      <div class="tray-item" id="tray-6">7</div>
+    </div>
+
+    <!-- Σκηνή AR (MindAR) -->
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
-      color-space="sRGB" 
-      renderer="colorManagement: true" 
-      vr-mode-ui="enabled: false" 
-      device-orientation-permission-ui="enabled: false">
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no;" 
+      color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
-      <!-- Προφόρτωση βίντεο στα assets -->
       <a-assets>
-        <video id="videoPappous" src="pappous_v3.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" loop crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-      <!-- 0: Η Νέα Ζωή -->
-      <a-entity mindar-image-target="targetIndex: 0" id="newborn"></a-entity>
-
-      <!-- 1: Ο Γάμος -->
-      <a-entity mindar-image-target="targetIndex: 1" id="gamos"></a-entity>
-
-      <!-- 2: Σμύρνη -->
-      <a-entity mindar-image-target="targetIndex: 2" id="smirni"></a-entity>
-
-      <!-- 3: Παντελή Σαλιάρη (Παππούς) -->
-      <a-entity mindar-image-target="targetIndex: 3" id="pappous">
-        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
-      </a-entity>
-
-      <!-- 4: Πούλος -->
-      <a-entity mindar-image-target="targetIndex: 4" id="poulos">
+      <!-- 7 Targets (index 0 έως 6) -->
+      <a-entity mindar-image-target="targetIndex: 0" id="target-0"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 1" id="target-1"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 2" id="target-2"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 3" id="target-3"></a-entity>
+      
+      <!-- Target 4: Θάνος Πούλος -->
+      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
         <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
-      <!-- 5: Φιλία -->
-      <a-entity mindar-image-target="targetIndex: 5" id="filia"></a-entity>
-
-      <!-- 6: Ραπτομηχανή -->
-      <a-entity mindar-image-target="targetIndex: 6" id="raptomihani"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 5" id="target-5"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 6" id="target-6"></a-entity>
 
     </a-scene>
 
     <script>
       const welcomeScreen = document.getElementById('welcomeScreen');
       const startBtn = document.getElementById('startBtn');
-      const infoTitle = document.getElementById('infoTitle');
+      const infoCard = document.getElementById('infoCard');
       const closeBtn = document.getElementById('closeBtn');
-      const soundWave = document.getElementById('soundWave');
-      const centerOverlay = document.getElementById('centerInstructionOverlay');
+      const scanReticle = document.getElementById('scanReticle');
+      const scanText = document.getElementById('scanText');
       const sceneEl = document.querySelector('a-scene');
 
-      const targetPappous = document.querySelector('#pappous');
-      const targetPoulos = document.querySelector('#poulos');
-
-      const videoPappous = document.querySelector('#videoPappous');
+      const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
+      const trayPoulos = document.querySelector('#tray-4');
 
-      const arVideoPappous = document.querySelector('#arVideoPappous');
-      const arVideoPoulos = document.querySelector('#arVideoPoulos');
-
-      let isPlaying = false;
-
-      // Έναρξη AR
+      // Όταν πατάει "Έναρξη", κλείνει το καλωσόρισμα και ξεκινά η κάμερα + UI
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
-        [videoPappous, videoPoulos].forEach(v => {
-          v.load();
-          v.play().then(() => { 
-            v.pause(); 
-            v.currentTime = 0; 
-          }).catch(err => console.warn(err));
-        });
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+        
+        videoPoulos.load();
+        videoPoulos.play().then(() => { 
+          videoPoulos.pause(); 
+          videoPoulos.currentTime = 0; 
+        }).catch(err => console.warn(err));
+
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // 1. Εντοπισμός: Παππούς (Παντελής Σαλιάρης)
-      targetPappous.addEventListener("targetFound", () => {
-        if (!isPlaying) {
-          isPlaying = true;
-          infoTitle.innerText = "Έκθεμα: Παππούς";
-          closeBtn.style.display = "inline-block";
-          videoPappous.play().catch(e => console.log(e));
-        }
-      });
-
-      // 2. Εντοπισμός: Πούλος
+      // Όταν σκανάρει τον Θάνο Πούλο
       targetPoulos.addEventListener("targetFound", () => {
-        if (!isPlaying) {
-          isPlaying = true;
-          infoTitle.innerText = "Έκθεμα: Πούλος";
-          closeBtn.style.display = "inline-block";
-          videoPoulos.play().catch(e => console.log(e));
-        }
-      });
-
-      // Διαχείριση χρονισμού για το βίντεο του Παππού
-      videoPappous.addEventListener('timeupdate', () => {
-        const currentTime = videoPappous.currentTime;
-
-        if (currentTime >= 55 && currentTime < 61) {
-          arVideoPappous.setAttribute('visible', 'false');
-          centerOverlay.style.display = 'flex';
-          soundWave.style.display = 'none';
-          infoTitle.innerText = "🔊 Οδηγία Ξενάγησης";
-        } else if (currentTime >= 61) {
-          centerOverlay.style.display = 'none';
-          soundWave.style.display = 'flex';
-          infoTitle.innerText = "🔊 Αφήγηση σε εξέλιξη";
-        }
-      });
-
-      // Κουμπί επαναφοράς "Επόμενο ✕"
-      closeBtn.addEventListener('click', () => {
-        stopAllVideos();
-        isPlaying = false;
-        closeBtn.style.display = "none";
-        soundWave.style.display = 'none';
-        centerOverlay.style.display = 'none';
+        infoCard.style.display = "block";
+        scanReticle.style.borderColor = "#28a745"; // Πράσινο όταν κλειδώσει
+        videoPoulos.play().catch(e => console.log(e));
         
-        arVideoPappous.setAttribute('visible', 'true');
-        arVideoPoulos.setAttribute('visible', 'true');
-
-        infoTitle.innerText = "Αναζήτηση εκθέματος...";
+        // Φωτίζει το εικονίδιο στη μπάρα κάτω (γίνεται active όπως στο Figma)
+        trayPoulos.classList.add('active');
       });
 
-      function stopAllVideos() {
-        [videoPappous, videoPoulos].forEach(v => { 
-          v.pause(); 
-          v.currentTime = 0; 
-        });
-      }
+      // Κουμπί κλεισίματος / επαναφοράς
+      closeBtn.addEventListener('click', () => {
+        videoPoulos.pause();
+        videoPoulos.currentTime = 0;
+        infoCard.style.display = "none";
+        scanReticle.style.borderColor = "#C49B55";
+      });
     </script>
   </body>
 </html>
