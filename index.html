@@ -56,7 +56,7 @@
         color: #E2DCD6; font-size: 13px; margin: 0; line-height: 1.35;
       }
 
-      /* Κουμπί Έναρξης & Υπότιτλος */
+      /* Κουμπί Έναρξης */
       .cta-container {
         text-align: center; width: 100%; max-width: 390px; margin-bottom: 10px;
       }
@@ -85,27 +85,58 @@
         padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;
       }
 
-      /* ΜΠΑΡΑ ΜΕ ΤΑ 7 ΣΗΜΕΙΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ */
+      /* ΜΠΑΡΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ (Πατιέται για να ανοίξει η λίστα) */
       #bottomTray {
         position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(45, 35, 33, 0.95); padding: 8px 12px;
-        border-radius: 20px; display: flex; align-items: center; justify-content: center;
-        gap: 8px; z-index: 9999; border: 1px solid rgba(196, 155, 85, 0.4);
+        background-color: rgba(45, 35, 33, 0.95); padding: 10px 16px;
+        border-radius: 20px; display: flex; align-items: center; justify-content: space-between;
+        gap: 12px; z-index: 9999; border: 1px solid rgba(196, 155, 85, 0.5);
         width: 90vw; max-width: 400px; box-sizing: border-box; display: none;
+        cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       }
-      .tray-item {
-        width: 38px; height: 38px; border-radius: 8px; background-color: #3D312E;
-        border: 1px solid #5C4B47; display: flex; align-items: center; justify-content: center;
-        opacity: 0.4; overflow: hidden; transition: all 0.3s ease;
+      .tray-info-text {
+        color: #E2DCD6; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px;
       }
-      .tray-item img {
-        width: 100%; height: 100%; object-fit: cover; border-radius: 6px;
+      .tray-preview-icons {
+        display: flex; gap: 4px;
       }
-      /* Ενεργό / Επισκεπτόμενο (Μόνιμος φωτισμός αφού το δει) */
-      .tray-item.visited {
-        opacity: 1; border: 2px solid #C49B55; background-color: #2D2321;
-        box-shadow: 0 0 12px rgba(196, 155, 85, 0.8);
+      .tray-mini {
+        width: 28px; height: 28px; border-radius: 6px; overflow: hidden; opacity: 0.4; border: 1px solid #5C4B47;
       }
+      .tray-mini img { width: 100%; height: 100%; object-fit: cover; }
+      .tray-mini.visited { opacity: 1; border: 1.5px solid #C49B55; }
+
+      /* FULLSCREEN MODAL (ΛΙΣΤΑ ΕΚΘΕΜΑΤΩΝ ΓΙΑ ΕΥΚΟΛΗ ΑΝΑΓΝΩΣΗ) */
+      #exhibitsModal {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-color: rgba(30, 24, 22, 0.96); z-index: 20000;
+        display: none; flex-direction: column; padding: 20px; box-sizing: border-box;
+      }
+      .modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid rgba(196,155,85,0.3); padding-bottom: 12px; margin-bottom: 15px;
+      }
+      .modal-header h3 { color: #C49B55; margin: 0; font-size: 18px; }
+      #modalCloseBtn {
+        background-color: #9A2B27; color: white; border: none; border-radius: 12px;
+        padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
+      }
+      .modal-grid {
+        display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; overflow-y: auto; padding-bottom: 20px;
+      }
+      .modal-item {
+        background-color: #2D2321; border: 1.5px solid #4A3C38; border-radius: 12px;
+        padding: 10px; display: flex; align-items: center; gap: 10px; opacity: 0.5; transition: 0.2s;
+      }
+      .modal-item.visited {
+        opacity: 1; border-color: #C49B55; background-color: #382C28;
+        box-shadow: 0 0 10px rgba(196,155,85,0.3);
+      }
+      .modal-item img {
+        width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+      }
+      .modal-item-text h4 { color: #fff; font-size: 13px; margin: 0 0 2px 0; }
+      .modal-item-text span { color: #C49B55; font-size: 11px; }
 
       /* Στόχος Σάρωσης & Λευκό κείμενο οδηγίας */
       #scanReticle {
@@ -126,7 +157,6 @@
 
     <!-- ΟΘΟΝΗ ΚΑΛΩΣΟΡΙΣΜΑΤΟΣ -->
     <div id="welcomeScreen">
-      
       <div class="header-section">
         <img src="images/logo.svg" alt="Λογότυπο Μουσείου">
         <h2>Μουσείο Προσφυγικής Μνήμης 1922<br>Σκάλα Λουτρών</h2>
@@ -163,7 +193,6 @@
         <button id="startBtn">Έναρξη Εμπειρίας AR</button>
         <div class="cta-subtext">Λειτουργεί απευθείας στο πρόγραμμα περιήγησης - Χωρίς εγκατάσταση</div>
       </div>
-
     </div>
 
     <!-- Στόχος Σάρωσης & Λευκό Κείμενο Οδηγίας -->
@@ -175,28 +204,87 @@
       <h3 id="infoTitle">Θάνος Πούλος</h3>
       <div class="player-row">
         <span id="playerStatus" style="font-size: 12px; color: #ccc;">▶ Αφήγηση σε εξέλιξη...</span>
-        <button id="closeBtn">Κλείσιμο ✕</button>
+        <button id="closeInfoBtn">Κλείσιμο ✕</button>
       </div>
     </div>
 
-    <!-- ΜΠΑΡΑ ΜΕ ΤΑ 7 ΣΗΜΕΙΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ -->
+    <!-- ΚΑΤΩ ΜΠΑΡΑ (Πατιέται για να ανοίξει η μεγάλη λίστα) -->
     <div id="bottomTray">
-      <div class="tray-item" id="tray-0"><img src="images/newborn.jpg" alt="Νέα Ζωή"></div>
-      <div class="tray-item" id="tray-1"><img src="images/gamos2.jpg" alt="Γάμος"></div>
-      <div class="tray-item" id="tray-2"><img src="images/smirni.jpg" alt="Σμύρνη"></div>
-      <div class="tray-item" id="tray-3"><img src="images/pappous.jpg" alt="Παππούς"></div>
-      <div class="tray-item" id="tray-4"><img src="images/poulos.jpg" alt="Πούλος"></div>
-      <div class="tray-item" id="tray-5"><img src="images/filia.jpg" alt="Φιλία"></div>
-      <div class="tray-item" id="tray-6"><img src="images/raptomihani.jpg" alt="Ραπτομηχανή"></div>
+      <div class="tray-info-text">
+        <span>📖 Λίστα Εκθεμάτων ( <span id="visitedCount">0</span>/7 )</span>
+      </div>
+      <div class="tray-preview-icons">
+        <div class="tray-mini" id="mini-0"><img src="images/newborn.jpg"></div>
+        <div class="tray-mini" id="mini-1"><img src="images/gamos2.jpg"></div>
+        <div class="tray-mini" id="mini-4"><img src="images/poulos.jpg"></div>
+      </div>
     </div>
 
-    <!-- Σκηνή AR (MindAR με φίλτρα εξομάλυνσης για λιγότερο τρεμόπαιγμα) -->
+    <!-- ΑΝΑΔΥΟΜΕΝΟ ΠΑΡΑΘΥΡΟ (MODAL) ΜΕ ΤΑ 7 ΕΚΘΕΜΑΤΑ ΜΕΓΑΛΑ -->
+    <div id="exhibitsModal">
+      <div class="modal-header">
+        <h3>Τα 7 Εκθέματα του Μουσείου</h3>
+        <button id="modalCloseBtn">Κλείσιμο ✕</button>
+      </div>
+      <div class="modal-grid">
+        <div class="modal-item" id="modal-item-0">
+          <img src="images/newborn.jpg">
+          <div class="modal-item-text">
+            <h4>Νέα Ζωή</h4>
+            <span id="stat-0">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-1">
+          <img src="images/gamos2.jpg">
+          <div class="modal-item-text">
+            <h4>Γάμος</h4>
+            <span id="stat-1">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-2">
+          <img src="images/smirni.jpg">
+          <div class="modal-item-text">
+            <h4>Σμύρνη</h4>
+            <span id="stat-2">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-3">
+          <img src="images/pappous.jpg">
+          <div class="modal-item-text">
+            <h4>Παππούς</h4>
+            <span id="stat-3">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-4">
+          <img src="images/poulos.jpg">
+          <div class="modal-item-text">
+            <h4>Θάνος Πούλος</h4>
+            <span id="stat-4">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-5">
+          <img src="images/filia.jpg">
+          <div class="modal-item-text">
+            <h4>Φιλία</h4>
+            <span id="stat-5">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+        <div class="modal-item" id="modal-item-6">
+          <img src="images/raptomihani.jpg">
+          <div class="modal-item-text">
+            <h4>Ραπτομηχανή</h4>
+            <span id="stat-6">⚪ Μη αναγνωρισμένο</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Σκηνή AR -->
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <!-- Χωρίς loop: παίζει μία φορά και σταματάει -->
         <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
@@ -207,30 +295,43 @@
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
       <a-entity mindar-image-target="targetIndex: 3"></a-entity>
       
-      <!-- Target 4: Θάνος Πούλος -->
       <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
         <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
-
     </a-scene>
 
     <script>
       const welcomeScreen = document.getElementById('welcomeScreen');
       const startBtn = document.getElementById('startBtn');
       const infoCard = document.getElementById('infoCard');
-      const closeBtn = document.getElementById('closeBtn');
+      const closeInfoBtn = document.getElementById('closeInfoBtn');
       const scanReticle = document.getElementById('scanReticle');
       const scanText = document.getElementById('scanText');
       const bottomTray = document.getElementById('bottomTray');
+      const exhibitsModal = document.getElementById('exhibitsModal');
+      const modalCloseBtn = document.getElementById('modalCloseBtn');
       const sceneEl = document.querySelector('a-scene');
 
       const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
-      const trayPoulos = document.querySelector('#tray-4');
       const playerStatus = document.getElementById('playerStatus');
+      
+      const visitedCountEl = document.getElementById('visitedCount');
+      let visitedTotal = 0;
+
+      // Άνοιγμα λίστας με πάτημα στην κάτω μπάρα
+      bottomTray.addEventListener('click', () => {
+        exhibitsModal.style.display = 'flex';
+      });
+
+      // Κλείσιμο λίστας
+      modalCloseBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        exhibitsModal.style.display = 'none';
+      });
 
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
@@ -247,29 +348,39 @@
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // Όταν σκανάρει το έκθεμα
+      // Σάρωση Θάνου Πούλου (Target 4)
       targetPoulos.addEventListener("targetFound", () => {
         infoCard.style.display = "block";
         scanReticle.style.borderColor = "#28a745"; 
         scanText.style.display = "none";
         scanReticle.style.display = "none";
 
-        if (videoPoulos.ended) {
-          videoPoulos.currentTime = 0;
-        }
+        if (videoPoulos.ended) { videoPoulos.currentTime = 0; }
         videoPoulos.play().catch(e => console.log(e));
         
-        // Φωτίζεται και μένει ΜΟΝΙΜΑ φωτισμένο (Visited state)
-        trayPoulos.classList.add('visited');
+        markExhibitAsVisited(4);
       });
 
-      // Όταν τελειώσει η αφήγηση φυσιολογικά
+      function markExhibitAsVisited(index) {
+        const modalItem = document.getElementById(`modal-item-${index}`);
+        const statSpan = document.getElementById(`stat-${index}`);
+        const miniItem = document.getElementById(`mini-${index}`);
+
+        if (modalItem && !modalItem.classList.contains('visited')) {
+          modalItem.classList.add('visited');
+          statSpan.textContent = "✔ Ολοκληρώθηκε";
+          if (miniItem) miniItem.classList.add('visited');
+          
+          visitedTotal++;
+          visitedCountEl.textContent = visitedTotal;
+        }
+      }
+
       videoPoulos.addEventListener('ended', () => {
         playerStatus.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
       });
 
-      // Κουμπί κλεισίματος
-      closeBtn.addEventListener('click', () => {
+      closeInfoBtn.addEventListener('click', () => {
         videoPoulos.pause();
         videoPoulos.currentTime = 0;
         infoCard.style.display = "none";
@@ -278,7 +389,6 @@
         
         scanReticle.style.display = "block";
         scanText.style.display = "block";
-        // Σημείωση: Το trayPoulos ΚΡΑΤΑΕΙ την κλάση 'visited' και δεν σβήνει!
       });
     </script>
   </body>
