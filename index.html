@@ -80,63 +80,68 @@
       }
       #infoCard h3 { margin: 0 0 8px 0; color: #C49B55; font-size: 16px; }
       .player-row { display: flex; align-items: center; justify-content: space-between; }
-      #closeBtn {
+      #closeInfoBtn {
         background-color: #9A2B27; color: white; border: none; border-radius: 12px;
         padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;
       }
 
-      /* ΜΠΑΡΑ ΣΤΟ ΚΑΤΩ ΜΕΡΟΣ (Πατιέται για να ανοίξει η λίστα) */
+      /* ΚΑΤΩ ΜΠΑΡΑ (Χωρίς εικονίδια, σκέτο καθαρό κουμπί) */
       #bottomTray {
         position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(45, 35, 33, 0.95); padding: 10px 16px;
-        border-radius: 20px; display: flex; align-items: center; justify-content: space-between;
-        gap: 12px; z-index: 9999; border: 1px solid rgba(196, 155, 85, 0.5);
-        width: 90vw; max-width: 400px; box-sizing: border-box; display: none;
+        background-color: rgba(45, 35, 33, 0.95); padding: 12px 24px;
+        border-radius: 24px; display: flex; align-items: center; justify-content: center;
+        z-index: 9999; border: 1.5px solid rgba(196, 155, 85, 0.6);
+        width: auto; max-width: 350px; box-sizing: border-box; display: none;
         cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.4);
       }
       .tray-info-text {
-        color: #E2DCD6; font-size: 13px; font-weight: bold; display: flex; align-items: center; gap: 6px;
+        color: #F4EEDD; font-size: 15px; font-weight: bold; letter-spacing: 0.3px;
       }
-      .tray-preview-icons {
-        display: flex; gap: 4px;
-      }
-      .tray-mini {
-        width: 28px; height: 28px; border-radius: 6px; overflow: hidden; opacity: 0.4; border: 1px solid #5C4B47;
-      }
-      .tray-mini img { width: 100%; height: 100%; object-fit: cover; }
-      .tray-mini.visited { opacity: 1; border: 1.5px solid #C49B55; }
 
-      /* FULLSCREEN MODAL (ΛΙΣΤΑ ΕΚΘΕΜΑΤΩΝ ΓΙΑ ΕΥΚΟΛΗ ΑΝΑΓΝΩΣΗ) */
+      /* MODAL ΜΕ ΤΗ ΔΙΑΤΑΞΗ ΤΟΥ ΣΧΕΔΙΟΥ ΣΑΣ (3 - 1 - 3) ΧΩΡΙΣ ΛΕΖΑΝΤΕΣ */
       #exhibitsModal {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-        background-color: rgba(30, 24, 22, 0.96); z-index: 20000;
+        background-color: rgba(30, 24, 22, 0.97); z-index: 20000;
         display: none; flex-direction: column; padding: 20px; box-sizing: border-box;
+        overflow-y: auto;
       }
       .modal-header {
         display: flex; justify-content: space-between; align-items: center;
-        border-bottom: 1px solid rgba(196,155,85,0.3); padding-bottom: 12px; margin-bottom: 15px;
+        border-bottom: 1px solid rgba(196,155,85,0.3); padding-bottom: 12px; margin-bottom: 20px;
+        flex-shrink: 0;
       }
       .modal-header h3 { color: #C49B55; margin: 0; font-size: 18px; }
       #modalCloseBtn {
         background-color: #9A2B27; color: white; border: none; border-radius: 12px;
         padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
       }
-      .modal-grid {
-        display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; overflow-y: auto; padding-bottom: 20px;
+
+      /* Διάταξη Σχεδίου: 3 σειρές (3 επάνω, 1 στη μέση, 3 κάτω) */
+      .modal-custom-layout {
+        display: flex; flex-direction: column; align-items: center; gap: 16px; padding-bottom: 30px; margin: auto 0;
       }
-      .modal-item {
-        background-color: #2D2321; border: 1.5px solid #4A3C38; border-radius: 12px;
-        padding: 10px; display: flex; align-items: center; gap: 10px; opacity: 0.5; transition: 0.2s;
+      .modal-row-3 {
+        display: flex; justify-content: center; gap: 14px; width: 100%;
       }
-      .modal-item.visited {
-        opacity: 1; border-color: #C49B55; background-color: #382C28;
-        box-shadow: 0 0 10px rgba(196,155,85,0.3);
+      .modal-row-1 {
+        display: flex; justify-content: center; width: 100%;
       }
-      .modal-item img {
-        width: 48px; height: 48px; border-radius: 8px; object-fit: cover; flex-shrink: 0;
+
+      /* Μεγάλα, καθαρά κουτιά εικόνων */
+      .modal-box {
+        width: 95px; height: 95px; background-color: #2D2321; border: 2px solid #4A3C38;
+        border-radius: 16px; overflow: hidden; opacity: 0.35; transition: all 0.3s ease;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
       }
-      .modal-item-text h4 { color: #fff; font-size: 13px; margin: 0 0 2px 0; }
-      .modal-item-text span { color: #C49B55; font-size: 11px; }
+      .modal-box img {
+        width: 100%; height: 100%; object-fit: cover;
+      }
+      /* Όταν σκαναριστεί, φωτίζεται έντονα */
+      .modal-box.visited {
+        opacity: 1; border: 2.5px solid #C49B55;
+        box-shadow: 0 0 15px rgba(196,155,85,0.8);
+        transform: scale(1.03);
+      }
 
       /* Στόχος Σάρωσης & Λευκό κείμενο οδηγίας */
       #scanReticle {
@@ -208,73 +213,38 @@
       </div>
     </div>
 
-    <!-- ΚΑΤΩ ΜΠΑΡΑ (Πατιέται για να ανοίξει η μεγάλη λίστα) -->
+    <!-- ΚΑΤΩ ΜΠΑΡΑ (Σκέτο καθαρό κουμπί) -->
     <div id="bottomTray">
       <div class="tray-info-text">
-        <span>📖 Λίστα Εκθεμάτων ( <span id="visitedCount">0</span>/7 )</span>
-      </div>
-      <div class="tray-preview-icons">
-        <div class="tray-mini" id="mini-0"><img src="images/newborn.jpg"></div>
-        <div class="tray-mini" id="mini-1"><img src="images/gamos2.jpg"></div>
-        <div class="tray-mini" id="mini-4"><img src="images/poulos.jpg"></div>
+        <span>Η Συλλογή μου ( <span id="visitedCount">0</span>/7 )</span>
       </div>
     </div>
 
-    <!-- ΑΝΑΔΥΟΜΕΝΟ ΠΑΡΑΘΥΡΟ (MODAL) ΜΕ ΤΑ 7 ΕΚΘΕΜΑΤΑ ΜΕΓΑΛΑ -->
+    <!-- ΑΝΑΔΥΟΜΕΝΟ ΠΑΡΑΘΥΡΟ (MODAL) ΜΕ ΤΗ ΔΙΑΤΑΞΗ ΤΟΥ ΣΧΕΔΙΟΥ ΣΑΣ (3 - 1 - 3) -->
     <div id="exhibitsModal">
       <div class="modal-header">
-        <h3>Τα 7 Εκθέματα του Μουσείου</h3>
+        <h3>Η Συλλογή μου</h3>
         <button id="modalCloseBtn">Κλείσιμο ✕</button>
       </div>
-      <div class="modal-grid">
-        <div class="modal-item" id="modal-item-0">
-          <img src="images/newborn.jpg">
-          <div class="modal-item-text">
-            <h4>Νέα Ζωή</h4>
-            <span id="stat-0">⚪ Μη αναγνωρισμένο</span>
-          </div>
+
+      <div class="modal-custom-layout">
+        <!-- Επάνω σειρά (3 εκθέματα) -->
+        <div class="modal-row-3">
+          <div class="modal-box" id="box-0"><img src="images/newborn.jpg" alt="Νέα Ζωή"></div>
+          <div class="modal-box" id="box-1"><img src="images/gamos2.jpg" alt="Γάμος"></div>
+          <div class="modal-box" id="box-2"><img src="images/smirni.jpg" alt="Σμύρνη"></div>
         </div>
-        <div class="modal-item" id="modal-item-1">
-          <img src="images/gamos2.jpg">
-          <div class="modal-item-text">
-            <h4>Γάμος</h4>
-            <span id="stat-1">⚪ Μη αναγνωρισμένο</span>
-          </div>
+
+        <!-- Μεσαία σειρά (1 έκθεμα - Θάνος Πούλος) -->
+        <div class="modal-row-1">
+          <div class="modal-box" id="box-4"><img src="images/poulos.jpg" alt="Θάνος Πούλος"></div>
         </div>
-        <div class="modal-item" id="modal-item-2">
-          <img src="images/smirni.jpg">
-          <div class="modal-item-text">
-            <h4>Σμύρνη</h4>
-            <span id="stat-2">⚪ Μη αναγνωρισμένο</span>
-          </div>
-        </div>
-        <div class="modal-item" id="modal-item-3">
-          <img src="images/pappous.jpg">
-          <div class="modal-item-text">
-            <h4>Παππούς</h4>
-            <span id="stat-3">⚪ Μη αναγνωρισμένο</span>
-          </div>
-        </div>
-        <div class="modal-item" id="modal-item-4">
-          <img src="images/poulos.jpg">
-          <div class="modal-item-text">
-            <h4>Θάνος Πούλος</h4>
-            <span id="stat-4">⚪ Μη αναγνωρισμένο</span>
-          </div>
-        </div>
-        <div class="modal-item" id="modal-item-5">
-          <img src="images/filia.jpg">
-          <div class="modal-item-text">
-            <h4>Φιλία</h4>
-            <span id="stat-5">⚪ Μη αναγνωρισμένο</span>
-          </div>
-        </div>
-        <div class="modal-item" id="modal-item-6">
-          <img src="images/raptomihani.jpg">
-          <div class="modal-item-text">
-            <h4>Ραπτομηχανή</h4>
-            <span id="stat-6">⚪ Μη αναγνωρισμένο</span>
-          </div>
+
+        <!-- Κάτω σειρά (3 εκθέματα) -->
+        <div class="modal-row-3">
+          <div class="modal-box" id="box-3"><img src="images/pappous.jpg" alt="Παππούς"></div>
+          <div class="modal-box" id="box-5"><img src="images/filia.jpg" alt="Φιλία"></div>
+          <div class="modal-box" id="box-6"><img src="images/raptomihani.jpg" alt="Ραπτομηχανή"></div>
         </div>
       </div>
     </div>
@@ -362,15 +332,10 @@
       });
 
       function markExhibitAsVisited(index) {
-        const modalItem = document.getElementById(`modal-item-${index}`);
-        const statSpan = document.getElementById(`stat-${index}`);
-        const miniItem = document.getElementById(`mini-${index}`);
+        const boxItem = document.getElementById(`box-${index}`);
 
-        if (modalItem && !modalItem.classList.contains('visited')) {
-          modalItem.classList.add('visited');
-          statSpan.textContent = "✔ Ολοκληρώθηκε";
-          if (miniItem) miniItem.classList.add('visited');
-          
+        if (boxItem && !boxItem.classList.contains('visited')) {
+          boxItem.classList.add('visited');
           visitedTotal++;
           visitedCountEl.textContent = visitedTotal;
         }
