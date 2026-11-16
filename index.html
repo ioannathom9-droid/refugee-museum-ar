@@ -12,7 +12,7 @@
     <style>
       body { margin: 0; overflow: hidden; font-family: sans-serif; background-color: #706C62; }
       
-      /* Οθόνη Καλωσορίσματος - Βελτιστοποιημένη για να μη κόβεται τίποτα */
+      /* Οθόνη Καλωσορίσματος */
       #welcomeScreen {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #706C62; z-index: 10000;
@@ -30,12 +30,12 @@
         font-size: 17px; line-height: 1.2; margin: 4px 0; font-weight: bold;
       }
       .badge-box {
-        border: 1.2px solid #C49B55; border-radius: 8px; padding: 6px 10px;
+        border: 1.2px solid #C49B55; border-radius: 8px; padding: 6px 12px;
         display: inline-block; color: #C49B55; font-size: 12px; font-weight: 500;
-        margin-top: 3px; background-color: rgba(45, 35, 33, 0.4);
+        margin-top: 3px; background-color: rgba(45, 35, 33, 0.4); text-align: center; line-height: 1.3;
       }
 
-      /* Τα 3 Κουτιά (Cards) - Ανεβασμένα λίγο πιο πάνω */
+      /* Τα 3 Κουτιά (Cards) */
       .features-wrapper {
         width: 100%; max-width: 390px; display: flex; flex-direction: column; gap: 8px; margin: 8px 0;
       }
@@ -56,7 +56,7 @@
         color: #D5CCC6; font-size: 12px; margin: 0; line-height: 1.3;
       }
 
-      /* Κουμπί Έναρξης & Υπότιτλος (Πιο ψηλά για να μη κόβονται) */
+      /* Κουμπί Έναρξης & Υπότιτλος */
       .cta-container {
         text-align: center; width: 100%; max-width: 390px; margin-bottom: 5px;
       }
@@ -127,10 +127,12 @@
     <div id="welcomeScreen">
       
       <div class="header-section">
-        <!-- Βάλε εδώ το ακριβές όνομα του SVG αρχείου σου, π.χ. logo.svg ή dolphin.svg -->
+        <!-- Βεβαιώσου ότι έχεις ονομάσει το αρχείο σου logo.svg ή άλλαξε το ανάλογα -->
         <img src="images/logo.svg" alt="Λογότυπο Μουσείου">
         <h2>Μουσείο Προσφυγικής Μνήμης 1922<br>Σκάλα Λουτρών</h2>
-       <div class="badge-box">Ψηφιακός Οδηγός<br>Επαυξημένης Πραγματικότητας (Web AR)</div>
+        
+        <!-- Εδώ έγινε η αλλαγή για να σπάει σε δύο γραμμές -->
+        <div class="badge-box">Ψηφιακός Οδηγός<br>Επαυξημένης Πραγματικότητας (Web AR)</div>
       </div>
 
       <div class="features-wrapper">
@@ -257,7 +259,7 @@
 
       closeBtn.addEventListener('click', () => {
         videoPoulos.pause();
-        videoPoulos.currentTime, videoPoulos.currentTime = 0;
+        videoPoulos.currentTime = 0;
         infoCard.style.display = "none";
         scanReticle.style.borderColor = "#C49B55";
         
