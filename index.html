@@ -278,7 +278,7 @@
       <div style="height: 10px;"></div>
     </div>
 
-    <!-- Σκηνή AR με βελτιωμένες παραμέτρους σταθερότητας (filterMinCF / filterBeta) -->
+    <!-- Σκηνή AR -->
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.001; filterBeta: 0.01;" 
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
@@ -330,7 +330,7 @@
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
       let currentExhibit = null;
-      let isPlaying = false; // Flag για να αποτρέψουμε το κλείσιμο από τυχαίο κούνημα
+      let isPlaying = false;
 
       // Χρονικός έλεγχος για το βίντεο του Παππού
       sharedVideo.addEventListener('timeupdate', () => {
@@ -365,58 +365,25 @@
         }
       });
 
-      // --- ΣΤΑΘΕΡΟΠΟΙΗΣΗ TARGETS (Χωρίς να χάνεται η εικόνα με ελαφρύ κούνημα) ---
-      
-      // Θάνος Πούλος
-      targetPoulos.addEventListener("targetFound", () => {
-        if (isPlaying && currentExhibit === 'poulos') return; // Αν παίζει ήδη, αγνοούμε τα μικρο-flickers
-        currentExhibit = 'poulos';
+      // Συνάρτηση ασφαλούς φόρτωσης και αναπαραγωγής βίντεο
+      function playVideoFile(filename, exhibitName, targetElement) {
+        currentExhibit = exhibitName;
         isPlaying = true;
 
         infoCard.classList.remove('centered-modal');
-        infoTitle.textContent = "Θάνος Πούλος";
-        infoText.textContent = "▶ Αφήγηση σε εξέλιξη...";
-        audioEqualizer.style.display = "none";
-        
-        if (!sharedVideo.src.includes("poulos_v3.mp4")) {
-          sharedVideo.src = "poulos_v3.mp4";
-        }
-        
-        targetPoulos.appendChild(arVideoPlane);
-        arVideoPlane.setAttribute('visible', 'true');
-
-        infoCard.style.display = "block";
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
-
-        sharedVideo.play().catch(e => console.log(e));
-        markExhibitAsVisited(4);
-      });
-
-      targetPoulos.addEventListener("targetLost", () => {
-        // Δεν σταματάμε τίποτα αν χαθεί προσωρινά ο δείκτης, για να μη τρεμοπαίζει η εικόνα!
-      });
-
-
-      // Παππούς
-      targetPappous.addEventListener("targetFound", () => {
-        if (isPlaying && currentExhibit === 'pappous') return;
-        currentExhibit = 'pappous';
-        isPlaying = true;
-
-        infoCard.classList.remove('centered-modal');
-        infoTitle.textContent = "Παππούς";
+        infoTitle.textContent = (exhibitName === 'poulos') ? "Θάνος Πούλος" : "Παππούς";
         infoText.textContent = "▶ Προβολή οπτικού υλικού...";
         audioEqualizer.style.display = "none";
 
-        if (!sharedVideo.src.includes("pappous.mp4")) {
-          sharedVideo.src = "pappous.mp4";
+        // Αν αλλάζει το βίντεο, το φορτώνουμε σωστά
+        if (!sharedVideo.src.includes(filename)) {
+          sharedVideo.src = filename;
+          sharedVideo.load();
         }
 
-        targetPappous.appendChild(arVideoPlane);
+        targetElement.appendChild(arVideoPlane);
         
-        // Αν είμαστε στην ώρα των κειμηλίων (0:53 - 1:00), κρατάμε το plane κρυφό αλλά το βίντεο παίζει κανονικά
-        if (sharedVideo.currentTime < 53 || sharedVideo.currentTime >= 60) {
+        if (exhibitName !== 'pappous' || sharedVideo.currentTime < 53 || sharedVideo.currentTime >= 60) {
           arVideoPlane.setAttribute('visible', 'true');
         }
 
@@ -424,14 +391,26 @@
         scanReticle.style.display = "none";
         scanText.style.display = "none";
 
-        sharedVideo.play().catch(e => console.log(e));
+        sharedVideo.play().catch(e => console.log("Video play error:", e));
+      }
+
+      // Σάρωση Θάνου Πούλου (Target 4)
+      targetPoulos.addEventListener("targetFound", () => {
+        if (isPlaying && currentExhibit === 'poulos') return;
+        playVideoFile("poulos_v3.mp4", "poulos", targetPoulos);
+        markExhibitAsVisited(4);
+      });
+
+      targetPoulos.addEventListener("targetLost", () => {});
+
+      // Σάρωση Παππού (Target 3)
+      targetPappous.addEventListener("targetFound", () => {
+        if (isPlaying && currentExhibit === 'pappous') return;
+        playVideoFile("pappous.mp4", "pappous", targetPappous);
         markExhibitAsVisited(3);
       });
 
-      targetPappous.addEventListener("targetLost", () => {
-        // Αφήνουμε το βίντεο να συνεχίσει απρόσκοπτα ακόμα και αν απομακρυνθεί ελαφρώς η κάμερα
-      });
-
+      targetPappous.addEventListener("targetLost", () => {});
 
       function markExhibitAsVisited(index) {
         const boxItem = document.getElementById(`box-${index}`);
