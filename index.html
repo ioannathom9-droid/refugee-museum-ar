@@ -69,16 +69,30 @@
 
       /* Κάρτα Πληροφοριών */
       #infoCard {
-        position: fixed; top: 32%; left: 50%; transform: translateX(-50%);
-        background-color: rgba(45, 35, 33, 0.98); color: #fff; padding: 20px;
-        border-radius: 18px; font-size: 15px; text-align: left;
+        position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+        background-color: rgba(45, 35, 33, 0.98); color: #fff; padding: 16px 20px;
+        border-radius: 18px; font-size: 14px; text-align: left;
         z-index: 9999; border: 2px solid #C49B55;
-        width: 90vw; max-width: 380px; box-shadow: 0 6px 25px rgba(0,0,0,0.7);
+        width: 88vw; max-width: 380px; box-shadow: 0 6px 25px rgba(0,0,0,0.7);
         display: none;
+        transition: all 0.3s ease;
       }
+      #infoCard.centered-modal {
+        top: 32%; bottom: auto;
+        padding: 24px;
+        border: 2.5px solid #E5C158;
+        box-shadow: 0 0 30px rgba(0,0,0,0.9);
+      }
+      #infoCard.centered-modal #infoText {
+        font-size: 16.5px;
+        line-height: 1.6;
+        font-weight: bold;
+        color: #FFFFFF;
+      }
+
       #infoTitle { margin: 0 0 8px 0; color: #E5C158; font-size: 18px; font-weight: bold; }
-      #infoText { color: #F4EEDD; font-size: 15px; line-height: 1.5; margin-bottom: 16px; font-weight: 500; }
-      .player-row { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(196,155,85,0.3); padding-top: 12px; }
+      #infoText { color: #F4EEDD; font-size: 14px; line-height: 1.4; margin-bottom: 12px; }
+      .player-row { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(196,155,85,0.3); padding-top: 10px; }
       #closeInfoBtn {
         background-color: #9A2B27; color: white; border: none; border-radius: 12px;
         padding: 8px 16px; font-size: 12px; font-weight: bold; cursor: pointer;
@@ -86,7 +100,7 @@
 
       /* Equalizer Animation */
       .equalizer {
-        display: none; align-items: flex-end; gap: 5px; height: 22px; margin-bottom: 14px;
+        display: none; align-items: flex-end; gap: 5px; height: 22px; margin-bottom: 12px;
       }
       .equalizer span {
         width: 5px; background-color: #C49B55; border-radius: 3px;
@@ -213,7 +227,7 @@
     <!-- Κάρτα Πληροφοριών -->
     <div id="infoCard">
       <h3 id="infoTitle">Τίτλος Εκθέματος</h3>
-      <div id="infoText">▶ Αφήγηση σε εξέλιξη...</div>
+      <div id="infoText">▶ Προβολή οπτικού υλικού...</div>
       
       <!-- Equalizer Animation -->
       <div class="equalizer" id="audioEqualizer">
@@ -264,9 +278,9 @@
       <div style="height: 10px;"></div>
     </div>
 
-    <!-- Σκηνή AR με Ενιαίο Δυναμικό Βίντεο (Dynamic Video Pool) -->
+    <!-- Σκηνή AR με βελτιωμένες παραμέτρους σταθερότητας (filterMinCF / filterBeta) -->
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.001; filterBeta: 0.01;" 
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
@@ -288,7 +302,7 @@
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
 
-      <!-- Ενιαίο 3D Video Plane που τοποθετείται δυναμικά στον ενεργό δείκτη -->
+      <!-- Ενιαίο 3D Video Plane -->
       <a-video id="arVideoPlane" src="#sharedVideo" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
     </a-scene>
 
@@ -316,17 +330,20 @@
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
       let currentExhibit = null;
+      let isPlaying = false; // Flag για να αποτρέψουμε το κλείσιμο από τυχαίο κούνημα
 
-      // Χρονικός έλεγχος αποκλειστικά για τον Παππού
+      // Χρονικός έλεγχος για το βίντεο του Παππού
       sharedVideo.addEventListener('timeupdate', () => {
         if (currentExhibit !== 'pappous') return;
         let currentTime = sharedVideo.currentTime;
         
         if (currentTime >= 53 && currentTime < 60) {
+          arVideoPlane.setAttribute('visible', 'false');
+          infoCard.classList.add('centered-modal');
           infoText.textContent = "Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!";
           audioEqualizer.style.display = "none";
-          arVideoPlane.setAttribute('visible', 'false');
         } else if (currentTime >= 60) {
+          infoCard.classList.remove('centered-modal');
           infoText.textContent = "▶ Συνέχεια ηχητικής αφήγησης...";
           audioEqualizer.style.display = "flex";
           arVideoPlane.setAttribute('visible', 'false');
@@ -337,7 +354,6 @@
       bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
       modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
 
-      // Άμεση εκκίνηση κάμερας
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
         scanReticle.style.display = 'block';
@@ -349,19 +365,23 @@
         }
       });
 
-      // Σάρωση Θάνου Πούλου (Target 4)
+      // --- ΣΤΑΘΕΡΟΠΟΙΗΣΗ TARGETS (Χωρίς να χάνεται η εικόνα με ελαφρύ κούνημα) ---
+      
+      // Θάνος Πούλος
       targetPoulos.addEventListener("targetFound", () => {
+        if (isPlaying && currentExhibit === 'poulos') return; // Αν παίζει ήδη, αγνοούμε τα μικρο-flickers
         currentExhibit = 'poulos';
+        isPlaying = true;
+
+        infoCard.classList.remove('centered-modal');
         infoTitle.textContent = "Θάνος Πούλος";
         infoText.textContent = "▶ Αφήγηση σε εξέλιξη...";
         audioEqualizer.style.display = "none";
         
-        // Συνδέουμε το βίντεο του Πούλου
-        if (sharedVideo.src !== window.location.origin + "/poulos_v3.mp4" && !sharedVideo.src.includes("poulos_v3.mp4")) {
+        if (!sharedVideo.src.includes("poulos_v3.mp4")) {
           sharedVideo.src = "poulos_v3.mp4";
         }
         
-        // Μεταφέρουμε το plane πάνω στον Πούλο και το εμφανίζουμε
         targetPoulos.appendChild(arVideoPlane);
         arVideoPlane.setAttribute('visible', 'true');
 
@@ -373,21 +393,32 @@
         markExhibitAsVisited(4);
       });
 
-      // Σάρωση Παππού (Target 3)
+      targetPoulos.addEventListener("targetLost", () => {
+        // Δεν σταματάμε τίποτα αν χαθεί προσωρινά ο δείκτης, για να μη τρεμοπαίζει η εικόνα!
+      });
+
+
+      // Παππούς
       targetPappous.addEventListener("targetFound", () => {
+        if (isPlaying && currentExhibit === 'pappous') return;
         currentExhibit = 'pappous';
+        isPlaying = true;
+
+        infoCard.classList.remove('centered-modal');
         infoTitle.textContent = "Παππούς";
         infoText.textContent = "▶ Προβολή οπτικού υλικού...";
         audioEqualizer.style.display = "none";
 
-        // Συνδέουμε το βίντεο του Παππού
         if (!sharedVideo.src.includes("pappous.mp4")) {
           sharedVideo.src = "pappous.mp4";
         }
 
-        // Μεταφέρουμε το plane πάνω στον Παππού και το εμφανίζουμε
         targetPappous.appendChild(arVideoPlane);
-        arVideoPlane.setAttribute('visible', 'true');
+        
+        // Αν είμαστε στην ώρα των κειμηλίων (0:53 - 1:00), κρατάμε το plane κρυφό αλλά το βίντεο παίζει κανονικά
+        if (sharedVideo.currentTime < 53 || sharedVideo.currentTime >= 60) {
+          arVideoPlane.setAttribute('visible', 'true');
+        }
 
         infoCard.style.display = "block";
         scanReticle.style.display = "none";
@@ -396,6 +427,11 @@
         sharedVideo.play().catch(e => console.log(e));
         markExhibitAsVisited(3);
       });
+
+      targetPappous.addEventListener("targetLost", () => {
+        // Αφήνουμε το βίντεο να συνεχίσει απρόσκοπτα ακόμα και αν απομακρυνθεί ελαφρώς η κάμερα
+      });
+
 
       function markExhibitAsVisited(index) {
         const boxItem = document.getElementById(`box-${index}`);
@@ -407,8 +443,10 @@
       }
 
       sharedVideo.addEventListener('ended', () => { 
+        infoCard.classList.remove('centered-modal');
         infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
         audioEqualizer.style.display = "none";
+        isPlaying = false;
       });
 
       closeInfoBtn.addEventListener('click', () => {
@@ -416,9 +454,11 @@
         sharedVideo.currentTime = 0;
         arVideoPlane.setAttribute('visible', 'false');
         infoCard.style.display = "none";
+        infoCard.classList.remove('centered-modal');
         scanReticle.style.borderColor = "#C49B55";
         audioEqualizer.style.display = "none";
         currentExhibit = null;
+        isPlaying = false;
         
         scanReticle.style.display = "block";
         scanText.style.display = "block";
