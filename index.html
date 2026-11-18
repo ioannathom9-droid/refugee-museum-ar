@@ -67,7 +67,7 @@
         color: #E2DCD6; font-size: 11.5px; margin-top: 8px; line-height: 1.3;
       }
 
-      /* Κάρτα Πληροφοριών: Στη μέση της οθόνης, μεγάλη και ευανάγνωστη */
+      /* Κάρτα Πληροφοριών */
       #infoCard {
         position: fixed; top: 32%; left: 50%; transform: translateX(-50%);
         background-color: rgba(45, 35, 33, 0.98); color: #fff; padding: 20px;
@@ -212,7 +212,7 @@
 
     <!-- Κάρτα Πληροφοριών -->
     <div id="infoCard">
-      <h3 id="infoTitle">Θάνος Πούλος</h3>
+      <h3 id="infoTitle">Τίτλος Εκθέματος</h3>
       <div id="infoText">▶ Αφήγηση σε εξέλιξη...</div>
       
       <!-- Equalizer Animation -->
@@ -264,14 +264,13 @@
       <div style="height: 10px;"></div>
     </div>
 
-    <!-- Σκηνή AR -->
+    <!-- Σκηνή AR με Ενιαίο Δυναμικό Βίντεο (Dynamic Video Pool) -->
     <a-scene 
       mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
-        <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="sharedVideo" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -281,17 +280,16 @@
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
       
       <!-- Target 3: Παππούς -->
-      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
-        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
-      </a-entity>
+      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous"></a-entity>
       
       <!-- Target 4: Θάνος Πούλος -->
-      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
-        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
-      </a-entity>
+      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos"></a-entity>
 
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
+
+      <!-- Ενιαίο 3D Video Plane που τοποθετείται δυναμικά στον ενεργό δείκτη -->
+      <a-video id="arVideoPlane" src="#sharedVideo" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
     </a-scene>
 
     <script>
@@ -307,10 +305,9 @@
       const sceneEl = document.querySelector('a-scene');
 
       const targetPoulos = document.querySelector('#target-poulos');
-      const videoPoulos = document.querySelector('#videoPoulos');
-      
       const targetPappous = document.querySelector('#target-pappous');
-      const videoPappous = document.querySelector('#videoPappous');
+      const sharedVideo = document.querySelector('#sharedVideo');
+      const arVideoPlane = document.querySelector('#arVideoPlane');
 
       const infoTitle = document.getElementById('infoTitle');
       const infoText = document.getElementById('infoText');
@@ -318,20 +315,114 @@
       
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
-      let activeVideo = null;
+      let currentExhibit = null;
 
-      // Χρονικός έλεγχος για το βίντεο του Παππού (00:53 έως 01:00)
-      videoPappous.addEventListener('timeupdate', () => {
-        if (activeVideo !== videoPappous) return;
-        let currentTime = videoPappous.currentTime;
+      // Χρονικός έλεγχος αποκλειστικά για τον Παππού
+      sharedVideo.addEventListener('timeupdate', () => {
+        if (currentExhibit !== 'pappous') return;
+        let currentTime = sharedVideo.currentTime;
         
         if (currentTime >= 53 && currentTime < 60) {
           infoText.textContent = "Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!";
           audioEqualizer.style.display = "none";
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
+          arVideoPlane.setAttribute('visible', 'false');
         } else if (currentTime >= 60) {
           infoText.textContent = "▶ Συνέχεια ηχητικής αφήγησης...";
           audioEqualizer.style.display = "flex";
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
+          arVideoPlane.setAttribute('visible', 'false');
         }
       });
+
+      // Άνοιγμα / Κλείσιμο λίστας
+      bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
+      modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
+
+      // Άμεση εκκίνηση κάμερας
+      startBtn.addEventListener('click', () => {
+        welcomeScreen.style.display = 'none';
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+        bottomTray.style.display = 'flex';
+        
+        if (sceneEl.systems["mindar-image-system"]) {
+          sceneEl.systems["mindar-image-system"].start();
+        }
+      });
+
+      // Σάρωση Θάνου Πούλου (Target 4)
+      targetPoulos.addEventListener("targetFound", () => {
+        currentExhibit = 'poulos';
+        infoTitle.textContent = "Θάνος Πούλος";
+        infoText.textContent = "▶ Αφήγηση σε εξέλιξη...";
+        audioEqualizer.style.display = "none";
+        
+        // Συνδέουμε το βίντεο του Πούλου
+        if (sharedVideo.src !== window.location.origin + "/poulos_v3.mp4" && !sharedVideo.src.includes("poulos_v3.mp4")) {
+          sharedVideo.src = "poulos_v3.mp4";
+        }
+        
+        // Μεταφέρουμε το plane πάνω στον Πούλο και το εμφανίζουμε
+        targetPoulos.appendChild(arVideoPlane);
+        arVideoPlane.setAttribute('visible', 'true');
+
+        infoCard.style.display = "block";
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        sharedVideo.play().catch(e => console.log(e));
+        markExhibitAsVisited(4);
+      });
+
+      // Σάρωση Παππού (Target 3)
+      targetPappous.addEventListener("targetFound", () => {
+        currentExhibit = 'pappous';
+        infoTitle.textContent = "Παππούς";
+        infoText.textContent = "▶ Προβολή οπτικού υλικού...";
+        audioEqualizer.style.display = "none";
+
+        // Συνδέουμε το βίντεο του Παππού
+        if (!sharedVideo.src.includes("pappous.mp4")) {
+          sharedVideo.src = "pappous.mp4";
+        }
+
+        // Μεταφέρουμε το plane πάνω στον Παππού και το εμφανίζουμε
+        targetPappous.appendChild(arVideoPlane);
+        arVideoPlane.setAttribute('visible', 'true');
+
+        infoCard.style.display = "block";
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        sharedVideo.play().catch(e => console.log(e));
+        markExhibitAsVisited(3);
+      });
+
+      function markExhibitAsVisited(index) {
+        const boxItem = document.getElementById(`box-${index}`);
+        if (boxItem && !boxItem.classList.contains('visited')) {
+          boxItem.classList.add('visited');
+          visitedTotal++;
+          visitedCountEl.textContent = visitedTotal;
+        }
+      }
+
+      sharedVideo.addEventListener('ended', () => { 
+        infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
+        audioEqualizer.style.display = "none";
+      });
+
+      closeInfoBtn.addEventListener('click', () => {
+        sharedVideo.pause();
+        sharedVideo.currentTime = 0;
+        arVideoPlane.setAttribute('visible', 'false');
+        infoCard.style.display = "none";
+        scanReticle.style.borderColor = "#C49B55";
+        audioEqualizer.style.display = "none";
+        currentExhibit = null;
+        
+        scanReticle.style.display = "block";
+        scanText.style.display = "block";
+      });
+    </script>
+  </body>
+</html>
