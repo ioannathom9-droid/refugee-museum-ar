@@ -154,7 +154,7 @@
         display: none; text-align: center; white-space: nowrap;
       }
 
-      /* ΝΕΟ: Ειδοποίηση / Κείμενο για τα πραγματικά εκθέματα (Διαφανές AR) */
+      /* Αναδυόμενο μήνυμα για τα πραγματικά εκθέματα (00:53 έως 01:00) */
       #museumPrompt {
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background-color: rgba(30, 20, 18, 0.85); color: #FFF; padding: 20px 24px;
@@ -165,7 +165,7 @@
       #museumPrompt h4 { color: #E5C158; margin: 0 0 10px 0; font-size: 18px; }
       #museumPrompt p { margin: 0; font-size: 14px; line-height: 1.5; color: #F2ECE4; }
 
-      /* Κόλπο για να γίνεται το μαύρο φόντο του βίντεο διάφανο στο AR */
+      /* Διάφανο AR */
       video {
         mix-blend-mode: screen;
       }
@@ -217,15 +217,15 @@
     <div id="scanReticle"></div>
     <div id="scanText">Στρέψτε την κάμερα σε ένα από τα 7 εκθέματα</div>
 
-    <!-- ΝΕΟ: Αναδυόμενο μήνυμα για τα πραγματικά εκθέματα (00:53 έως 01:00) -->
+    <!-- Αναδυόμενο μήνυμα για τα πραγματικά εκθέματα -->
     <div id="museumPrompt">
       <h4>Αφήστε για λίγο την οθόνη...</h4>
-      <p>Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!</p>
+      <p>Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά αντικείμενα, ακούγοντας τη συνέχεια της ιστορίας μας!</p>
     </div>
 
     <!-- Κάρτα Πληροφοριών -->
     <div id="infoCard">
-      <h3 id="infoTitle">Θάνος Πούλος</h3>
+      <h3 id="infoTitle">Ο Παππούς</h3>
       <div class="player-row">
         <span id="playerStatus" style="font-size: 12px; color: #ccc;">▶ Αφήγηση σε εξέλιξη...</span>
         <button id="closeInfoBtn">Κλείσιμο ✕</button>
@@ -259,7 +259,7 @@
           <div class="modal-box" id="box-4"><img src="images/poulos.jpg" alt="Θάνος Πούλος"></div>
         </div>
 
-        <!-- Κάτω σειρά (3 εκθέματα) -->
+        <!-- Κάτω σειρά (3 εκθέματα - Ο Παππούς είναι στο box-3) -->
         <div class="modal-row-3">
           <div class="modal-box" id="box-3"><img src="images/pappous.jpg" alt="Παππούς"></div>
           <div class="modal-box" id="box-5"><img src="images/filia.jpg" alt="Φιλία"></div>
@@ -276,7 +276,7 @@
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -284,12 +284,13 @@
       <a-entity mindar-image-target="targetIndex: 0"></a-entity>
       <a-entity mindar-image-target="targetIndex: 1"></a-entity>
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 3"></a-entity>
       
-      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
-        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
+      <!-- Ο Παππούς συνδέεται στο Target 3 -->
+      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
       </a-entity>
 
+      <a-entity mindar-image-target="targetIndex: 4"></a-entity>
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
     </a-scene>
@@ -307,19 +308,17 @@
       const sceneEl = document.querySelector('a-scene');
       const museumPrompt = document.getElementById('museumPrompt');
 
-      const targetPoulos = document.querySelector('#target-poulos');
-      const videoPoulos = document.querySelector('#videoPoulos');
+      const targetPappous = document.querySelector('#target-pappous');
+      const videoPappous = document.querySelector('#videoPappous');
       const playerStatus = document.getElementById('playerStatus');
       
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
 
-      // Άνοιγμα λίστας με πάτημα στην κάτω μπάρα
       bottomTray.addEventListener('click', () => {
         exhibitsModal.style.display = 'flex';
       });
 
-      // Κλείσιμο λίστας
       modalCloseBtn.addEventListener('click', (e) => {
         e.stopPropagation();
         exhibitsModal.style.display = 'none';
@@ -331,33 +330,32 @@
         scanText.style.display = 'block';
         bottomTray.style.display = 'flex';
         
-        videoPoulos.load();
-        videoPoulos.play().then(() => { 
-          videoPoulos.pause(); 
-          videoPoulos.currentTime = 0; 
+        videoPappous.load();
+        videoPappous.play().then(() => { 
+          videoPappous.pause(); 
+          videoPappous.currentTime = 0; 
         }).catch(err => console.warn(err));
 
         sceneEl.systems["mindar-image-system"].start();
       });
 
-      // Σάρωση Θάνου Πούλου (Target 4)
-      targetPoulos.addEventListener("targetFound", () => {
+      // Σάρωση Παππού (Target 3, box-3)
+      targetPappous.addEventListener("targetFound", () => {
         infoCard.style.display = "block";
         scanReticle.style.borderColor = "#28a745"; 
         scanText.style.display = "none";
         scanReticle.style.display = "none";
 
-        if (videoPoulos.ended) { videoPoulos.currentTime = 0; }
-        videoPoulos.play().catch(e => console.log(e));
+        if (videoPappous.ended) { videoPappous.currentTime = 0; }
+        videoPappous.play().catch(e => console.log(e));
         
-        markExhibitAsVisited(4);
+        markExhibitAsVisited(3);
       });
 
-      // Χρονοδιακόπτης βίντεο: Εμφάνιση μηνύματος από 53:10 έως 01:00
-      videoPoulos.addEventListener('timeupdate', () => {
-        const currentTime = videoPoulos.currentTime;
+      // Χρονοδιακόπτης βίντεο: Εμφάνιση μηνύματος από 53.10 έως 01:00
+      videoPappous.addEventListener('timeupdate', () => {
+        const currentTime = videoPappous.currentTime;
         
-        // Από 53.1 δευτερόλεπτα μέχρι 60.0 δευτερόλεπτα
         if (currentTime >= 53.10 && currentTime < 60.0) {
           museumPrompt.style.display = 'block';
         } else {
@@ -375,14 +373,14 @@
         }
       }
 
-      videoPoulos.addEventListener('ended', () => {
+      videoPappous.addEventListener('ended', () => {
         playerStatus.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
         museumPrompt.style.display = 'none';
       });
 
       closeInfoBtn.addEventListener('click', () => {
-        videoPoulos.pause();
-        videoPoulos.currentTime = 0;
+        videoPappous.pause();
+        videoPappous.currentTime = 0;
         infoCard.style.display = "none";
         museumPrompt.style.display = 'none';
         scanReticle.style.borderColor = "#C49B55";
