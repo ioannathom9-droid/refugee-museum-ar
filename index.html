@@ -85,7 +85,7 @@
         padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;
       }
 
-      /* ΚΑΤΩ ΜΠΑΡΑ (Μεγαλύτερη, άνετη, με πολύ ζωηρό και έντονο χρυσαφί περίγραμμα) */
+      /* ΚΑΤΩ ΜΠΑΡΑ */
       #bottomTray {
         position: fixed; bottom: 15px; left: 50%; transform: translateX(-50%);
         background-color: rgba(35, 28, 26, 0.96); padding: 14px 26px;
@@ -98,7 +98,7 @@
         color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.4px; white-space: nowrap;
       }
 
-      /* MODAL ΜΕ ΤΗ ΔΙΑΤΑΞΗ (3 - 1 - 3) - Μεγαλύτερα κουτιά και πιο άνετα κενά */
+      /* MODAL ΜΕ ΤΗ ΔΙΑΤΑΞΗ (3 - 1 - 3) */
       #exhibitsModal {
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: rgba(25, 20, 18, 0.98); z-index: 20000;
@@ -116,7 +116,6 @@
         padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
       }
 
-      /* Διάταξη Σχεδίου: 3 σειρές με ωραία, άνετα κενά */
       .modal-custom-layout {
         display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; margin: auto 0; padding: 10px 0;
       }
@@ -127,7 +126,6 @@
         display: flex; justify-content: center; width: 100%;
       }
 
-      /* Μεγαλύτερα κουτιά εικόνων για άνετη προβολή */
       .modal-box {
         width: 102px; height: 102px; background-color: #2D2321; border: 2px solid #5A4842;
         border-radius: 18px; overflow: hidden; opacity: 0.35; transition: all 0.3s ease;
@@ -136,7 +134,6 @@
       .modal-box img {
         width: 100%; height: 100%; object-fit: cover;
       }
-      /* Όταν σκαναριστεί, φωτίζεται έντονα με ζωηρό χρυσό */
       .modal-box.visited {
         opacity: 1; border: 3px solid #E5C158;
         box-shadow: 0 0 18px rgba(229,193,88,0.9);
@@ -155,6 +152,22 @@
         color: #ffffff; background: rgba(0,0,0,0.75); padding: 8px 16px; border-radius: 20px;
         font-size: 13px; font-weight: 500; z-index: 9990; border: 1px solid rgba(196,155,85,0.4);
         display: none; text-align: center; white-space: nowrap;
+      }
+
+      /* ΝΕΟ: Ειδοποίηση / Κείμενο για τα πραγματικά εκθέματα (Διαφανές AR) */
+      #museumPrompt {
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background-color: rgba(30, 20, 18, 0.85); color: #FFF; padding: 20px 24px;
+        border-radius: 16px; border: 2px solid #C49B55; text-align: center;
+        z-index: 15000; display: none; width: 85vw; max-width: 350px;
+        box-shadow: 0 8px 25px rgba(0,0,0,0.7);
+      }
+      #museumPrompt h4 { color: #E5C158; margin: 0 0 10px 0; font-size: 18px; }
+      #museumPrompt p { margin: 0; font-size: 14px; line-height: 1.5; color: #F2ECE4; }
+
+      /* Κόλπο για να γίνεται το μαύρο φόντο του βίντεο διάφανο στο AR */
+      video {
+        mix-blend-mode: screen;
       }
     </style>
   </head>
@@ -204,6 +217,12 @@
     <div id="scanReticle"></div>
     <div id="scanText">Στρέψτε την κάμερα σε ένα από τα 7 εκθέματα</div>
 
+    <!-- ΝΕΟ: Αναδυόμενο μήνυμα για τα πραγματικά εκθέματα (00:53 έως 01:00) -->
+    <div id="museumPrompt">
+      <h4>Αφήστε για λίγο την οθόνη...</h4>
+      <p>Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!</p>
+    </div>
+
     <!-- Κάρτα Πληροφοριών -->
     <div id="infoCard">
       <h3 id="infoTitle">Θάνος Πούλος</h3>
@@ -213,7 +232,7 @@
       </div>
     </div>
 
-    <!-- ΚΑΤΩ ΜΠΑΡΑ (Μεγαλύτερη, άνετη, με έντονο χρυσαφί) -->
+    <!-- ΚΑΤΩ ΜΠΑΡΑ -->
     <div id="bottomTray">
       <div class="tray-info-text">
         <span>Η Συλλογή μου ( <span id="visitedCount">0</span>/7 )</span>
@@ -286,6 +305,7 @@
       const exhibitsModal = document.getElementById('exhibitsModal');
       const modalCloseBtn = document.getElementById('modalCloseBtn');
       const sceneEl = document.querySelector('a-scene');
+      const museumPrompt = document.getElementById('museumPrompt');
 
       const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
@@ -333,6 +353,18 @@
         markExhibitAsVisited(4);
       });
 
+      // Χρονοδιακόπτης βίντεο: Εμφάνιση μηνύματος από 53:10 έως 01:00
+      videoPoulos.addEventListener('timeupdate', () => {
+        const currentTime = videoPoulos.currentTime;
+        
+        // Από 53.1 δευτερόλεπτα μέχρι 60.0 δευτερόλεπτα
+        if (currentTime >= 53.10 && currentTime < 60.0) {
+          museumPrompt.style.display = 'block';
+        } else {
+          museumPrompt.style.display = 'none';
+        }
+      });
+
       function markExhibitAsVisited(index) {
         const boxItem = document.getElementById(`box-${index}`);
 
@@ -345,12 +377,14 @@
 
       videoPoulos.addEventListener('ended', () => {
         playerStatus.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
+        museumPrompt.style.display = 'none';
       });
 
       closeInfoBtn.addEventListener('click', () => {
         videoPoulos.pause();
         videoPoulos.currentTime = 0;
         infoCard.style.display = "none";
+        museumPrompt.style.display = 'none';
         scanReticle.style.borderColor = "#C49B55";
         playerStatus.textContent = "▶ Αφήγηση σε εξέλιξη...";
         
