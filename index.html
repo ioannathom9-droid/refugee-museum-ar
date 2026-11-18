@@ -284,7 +284,8 @@
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
-        <video id="sharedVideo" crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -294,16 +295,17 @@
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
       
       <!-- Target 3: Παππούς -->
-      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
+      </a-entity>
       
       <!-- Target 4: Θάνος Πούλος -->
-      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
+        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
+      </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
-
-      <!-- Ενιαίο 3D Video Plane -->
-      <a-video id="arVideoPlane" src="#sharedVideo" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
     </a-scene>
 
     <script>
@@ -319,9 +321,10 @@
       const sceneEl = document.querySelector('a-scene');
 
       const targetPoulos = document.querySelector('#target-poulos');
+      const videoPoulos = document.querySelector('#videoPoulos');
+      
       const targetPappous = document.querySelector('#target-pappous');
-      const sharedVideo = document.querySelector('#sharedVideo');
-      const arVideoPlane = document.querySelector('#arVideoPlane');
+      const videoPappous = document.querySelector('#videoPappous');
 
       const infoTitle = document.getElementById('infoTitle');
       const infoText = document.getElementById('infoText');
@@ -329,16 +332,15 @@
       
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
-      let currentExhibit = null;
-      let isPlaying = false;
+      let activeVideo = null;
 
       // Χρονικός έλεγχος για το βίντεο του Παππού
-      sharedVideo.addEventListener('timeupdate', () => {
-        if (currentExhibit !== 'pappous') return;
-        let currentTime = sharedVideo.currentTime;
+      videoPappous.addEventListener('timeupdate', () => {
+        if (activeVideo !== videoPappous) return;
+        let currentTime = videoPappous.currentTime;
         
         if (currentTime >= 53 && currentTime < 60) {
-          arVideoPlane.setAttribute('visible', 'false');
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
           infoCard.classList.add('centered-modal');
           infoText.textContent = "Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!";
           audioEqualizer.style.display = "none";
@@ -346,7 +348,7 @@
           infoCard.classList.remove('centered-modal');
           infoText.textContent = "▶ Συνέχεια ηχητικής αφήγησης...";
           audioEqualizer.style.display = "flex";
-          arVideoPlane.setAttribute('visible', 'false');
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
         }
       });
 
@@ -354,50 +356,36 @@
       bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
       modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
 
+      // Ξεκινάει η εμπειρία AR και προετοιμάζονται τα βίντεο με user gesture
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
         scanReticle.style.display = 'block';
         scanText.style.display = 'block';
         bottomTray.style.display = 'flex';
         
+        [videoPoulos, videoPappous].forEach(v => {
+          v.load();
+        });
+
         if (sceneEl.systems["mindar-image-system"]) {
           sceneEl.systems["mindar-image-system"].start();
         }
       });
 
-      // Συνάρτηση ασφαλούς φόρτωσης και αναπαραγωγής βίντεο
-      function playVideoFile(filename, exhibitName, targetElement) {
-        currentExhibit = exhibitName;
-        isPlaying = true;
-
+      // Σάρωση Θάνου Πούλου (Target 4)
+      targetPoulos.addEventListener("targetFound", () => {
+        activeVideo = videoPoulos;
         infoCard.classList.remove('centered-modal');
-        infoTitle.textContent = (exhibitName === 'poulos') ? "Θάνος Πούλος" : "Παππούς";
-        infoText.textContent = "▶ Προβολή οπτικού υλικού...";
+        infoTitle.textContent = "Θάνος Πούλος";
+        infoText.textContent = "▶ Αφήγηση σε εξέλιξη...";
         audioEqualizer.style.display = "none";
-
-        // Αν αλλάζει το βίντεο, το φορτώνουμε σωστά
-        if (!sharedVideo.src.includes(filename)) {
-          sharedVideo.src = filename;
-          sharedVideo.load();
-        }
-
-        targetElement.appendChild(arVideoPlane);
+        document.querySelector('#arVideoPoulos').setAttribute('visible', 'true');
         
-        if (exhibitName !== 'pappous' || sharedVideo.currentTime < 53 || sharedVideo.currentTime >= 60) {
-          arVideoPlane.setAttribute('visible', 'true');
-        }
-
         infoCard.style.display = "block";
         scanReticle.style.display = "none";
         scanText.style.display = "none";
 
-        sharedVideo.play().catch(e => console.log("Video play error:", e));
-      }
-
-      // Σάρωση Θάνου Πούλου (Target 4)
-      targetPoulos.addEventListener("targetFound", () => {
-        if (isPlaying && currentExhibit === 'poulos') return;
-        playVideoFile("poulos_v3.mp4", "poulos", targetPoulos);
+        activeVideo.play().catch(e => console.log("Poulos play error:", e));
         markExhibitAsVisited(4);
       });
 
@@ -405,8 +393,21 @@
 
       // Σάρωση Παππού (Target 3)
       targetPappous.addEventListener("targetFound", () => {
-        if (isPlaying && currentExhibit === 'pappous') return;
-        playVideoFile("pappous.mp4", "pappous", targetPappous);
+        activeVideo = videoPappous;
+        infoCard.classList.remove('centered-modal');
+        infoTitle.textContent = "Παππούς";
+        infoText.textContent = "▶ Προβολή οπτικού υλικού...";
+        audioEqualizer.style.display = "none";
+        
+        if (videoPappous.currentTime < 53 || videoPappous.currentTime >= 60) {
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'true');
+        }
+
+        infoCard.style.display = "block";
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        activeVideo.play().catch(e => console.log("Pappous play error:", e));
         markExhibitAsVisited(3);
       });
 
@@ -421,23 +422,31 @@
         }
       }
 
-      sharedVideo.addEventListener('ended', () => { 
+      videoPoulos.addEventListener('ended', () => { 
         infoCard.classList.remove('centered-modal');
         infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
         audioEqualizer.style.display = "none";
-        isPlaying = false;
+      });
+
+      videoPappous.addEventListener('ended', () => { 
+        infoCard.classList.remove('centered-modal');
+        infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
+        audioEqualizer.style.display = "none";
       });
 
       closeInfoBtn.addEventListener('click', () => {
-        sharedVideo.pause();
-        sharedVideo.currentTime = 0;
-        arVideoPlane.setAttribute('visible', 'false');
+        if (activeVideo) {
+          activeVideo.pause();
+          activeVideo.currentTime = 0;
+        }
+        document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
+        document.querySelector('#arVideoPoulos').setAttribute('visible', 'false');
+        
         infoCard.style.display = "none";
         infoCard.classList.remove('centered-modal');
         scanReticle.style.borderColor = "#C49B55";
         audioEqualizer.style.display = "none";
-        currentExhibit = null;
-        isPlaying = false;
+        activeVideo = null;
         
         scanReticle.style.display = "block";
         scanText.style.display = "block";
