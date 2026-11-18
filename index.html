@@ -221,7 +221,7 @@
       </div>
 
       <div class="player-row">
-        <span style="font-size: 11px; color: #aaa;" id="timeIndicator">AR Οδηγός</span>
+        <span style="font-size: 11px; color: #aaa;">AR Οδηγός</span>
         <button id="closeInfoBtn">Κλείσιμο ✕</button>
       </div>
     </div>
@@ -320,7 +320,7 @@
       let visitedTotal = 0;
       let activeVideo = null;
 
-      // Παρακολούθηση χρόνου για το βίντεο του Παππού (00:53 -> μήνυμα, 01:00 -> equalizer)
+      // Χρονικός έλεγχος για το βίντεο του Παππού
       videoPappous.addEventListener('timeupdate', () => {
         let currentTime = videoPappous.currentTime;
         if (currentTime >= 53 && currentTime < 60) {
@@ -336,19 +336,17 @@
       bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
       modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
 
+      // Κουμπί Έναρξης (με ασφαλή εκκίνηση AR χωρίς να κολλάει αν καθυστερήσει κάποιο βίντεο)
       startBtn.addEventListener('click', () => {
         welcomeScreen.style.display = 'none';
         scanReticle.style.display = 'block';
         scanText.style.display = 'block';
         bottomTray.style.display = 'flex';
         
-        // Προφόρτωση βίντεο
-        [videoPoulos, videoPappous].forEach(v => {
-          v.load();
-          v.play().then(() => { v.pause(); v.currentTime = 0; }).catch(err => console.warn(err));
-        });
-
-        sceneEl.systems["mindar-image-system"].start();
+        // Ξεκινάει άμεσα το MindAR system
+        if (sceneEl.systems["mindar-image-system"]) {
+          sceneEl.systems["mindar-image-system"].start();
+        }
       });
 
       // Σάρωση Θάνου Πούλου (Target 4)
