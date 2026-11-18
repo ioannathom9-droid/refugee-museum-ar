@@ -67,29 +67,29 @@
         color: #E2DCD6; font-size: 11.5px; margin-top: 8px; line-height: 1.3;
       }
 
-      /* Κάρτα Πληροφοριών / Media Player */
+      /* Κάρτα Πληροφοριών: Στη μέση της οθόνης, μεγάλη και ευανάγνωστη */
       #infoCard {
-        position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
-        background-color: #2D2321; color: #fff; padding: 16px 20px;
-        border-radius: 16px; font-size: 14px; text-align: left;
-        z-index: 9999; border: 1.5px solid #C49B55;
-        width: 88vw; max-width: 380px; box-shadow: 0 4px 20px rgba(0,0,0,0.6);
+        position: fixed; top: 32%; left: 50%; transform: translateX(-50%);
+        background-color: rgba(45, 35, 33, 0.98); color: #fff; padding: 20px;
+        border-radius: 18px; font-size: 15px; text-align: left;
+        z-index: 9999; border: 2px solid #C49B55;
+        width: 90vw; max-width: 380px; box-shadow: 0 6px 25px rgba(0,0,0,0.7);
         display: none;
       }
-      #infoTitle { margin: 0 0 6px 0; color: #C49B55; font-size: 16px; font-weight: bold; }
-      #infoText { color: #E2DCD6; font-size: 13px; line-height: 1.4; margin-bottom: 12px; }
-      .player-row { display: flex; align-items: center; justify-content: space-between; }
+      #infoTitle { margin: 0 0 8px 0; color: #E5C158; font-size: 18px; font-weight: bold; }
+      #infoText { color: #F4EEDD; font-size: 15px; line-height: 1.5; margin-bottom: 16px; font-weight: 500; }
+      .player-row { display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(196,155,85,0.3); padding-top: 12px; }
       #closeInfoBtn {
         background-color: #9A2B27; color: white; border: none; border-radius: 12px;
-        padding: 6px 12px; font-size: 11px; font-weight: bold; cursor: pointer;
+        padding: 8px 16px; font-size: 12px; font-weight: bold; cursor: pointer;
       }
 
       /* Equalizer Animation */
       .equalizer {
-        display: none; align-items: flex-end; gap: 4px; height: 18px; margin-bottom: 10px;
+        display: none; align-items: flex-end; gap: 5px; height: 22px; margin-bottom: 14px;
       }
       .equalizer span {
-        width: 4px; background-color: #C49B55; border-radius: 2px;
+        width: 5px; background-color: #C49B55; border-radius: 3px;
         animation: bounce 0.8s infinite ease-in-out alternate;
       }
       .equalizer span:nth-child(2) { animation-delay: 0.2s; }
@@ -97,8 +97,8 @@
       .equalizer span:nth-child(4) { animation-delay: 0.1s; }
       .equalizer span:nth-child(5) { animation-delay: 0.3s; }
       @keyframes bounce {
-        0% { height: 4px; }
-        100% { height: 18px; }
+        0% { height: 6px; }
+        100% { height: 22px; }
       }
 
       /* ΚΑΤΩ ΜΠΑΡΑ */
@@ -221,7 +221,7 @@
       </div>
 
       <div class="player-row">
-        <span style="font-size: 11px; color: #aaa;">AR Οδηγός</span>
+        <span style="font-size: 12px; color: #E5C158; font-weight: bold;">AR Οδηγός Μουσείου</span>
         <button id="closeInfoBtn">Κλείσιμο ✕</button>
       </div>
     </div>
@@ -320,94 +320,18 @@
       let visitedTotal = 0;
       let activeVideo = null;
 
-      // Χρονικός έλεγχος για το βίντεο του Παππού
+      // Χρονικός έλεγχος για το βίντεο του Παππού (00:53 έως 01:00)
       videoPappous.addEventListener('timeupdate', () => {
+        if (activeVideo !== videoPappous) return;
         let currentTime = videoPappous.currentTime;
+        
         if (currentTime >= 53 && currentTime < 60) {
           infoText.textContent = "Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!";
           audioEqualizer.style.display = "none";
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
         } else if (currentTime >= 60) {
           infoText.textContent = "▶ Συνέχεια ηχητικής αφήγησης...";
           audioEqualizer.style.display = "flex";
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
         }
       });
-
-      // Άνοιγμα / Κλείσιμο λίστας
-      bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
-      modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
-
-      // Κουμπί Έναρξης (με ασφαλή εκκίνηση AR χωρίς να κολλάει αν καθυστερήσει κάποιο βίντεο)
-      startBtn.addEventListener('click', () => {
-        welcomeScreen.style.display = 'none';
-        scanReticle.style.display = 'block';
-        scanText.style.display = 'block';
-        bottomTray.style.display = 'flex';
-        
-        // Ξεκινάει άμεσα το MindAR system
-        if (sceneEl.systems["mindar-image-system"]) {
-          sceneEl.systems["mindar-image-system"].start();
-        }
-      });
-
-      // Σάρωση Θάνου Πούλου (Target 4)
-      targetPoulos.addEventListener("targetFound", () => {
-        activeVideo = videoPoulos;
-        infoTitle.textContent = "Θάνος Πούλος";
-        infoText.textContent = "▶ Αφήγηση σε εξέλιξη...";
-        audioEqualizer.style.display = "none";
-        
-        infoCard.style.display = "block";
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
-
-        if (activeVideo.ended) activeVideo.currentTime = 0;
-        activeVideo.play().catch(e => console.log(e));
-        markExhibitAsVisited(4);
-      });
-
-      // Σάρωση Παππού (Target 3)
-      targetPappous.addEventListener("targetFound", () => {
-        activeVideo = videoPappous;
-        infoTitle.textContent = "Παππούς";
-        infoText.textContent = "▶ Προβολή οπτικού υλικού...";
-        audioEqualizer.style.display = "none";
-
-        infoCard.style.display = "block";
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
-
-        if (activeVideo.ended) activeVideo.currentTime = 0;
-        activeVideo.play().catch(e => console.log(e));
-        markExhibitAsVisited(3);
-      });
-
-      function markExhibitAsVisited(index) {
-        const boxItem = document.getElementById(`box-${index}`);
-        if (boxItem && !boxItem.classList.contains('visited')) {
-          boxItem.classList.add('visited');
-          visitedTotal++;
-          visitedCountEl.textContent = visitedTotal;
-        }
-      }
-
-      videoPoulos.addEventListener('ended', () => { infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε"; });
-      videoPappous.addEventListener('ended', () => { 
-        infoText.textContent = "✔ Η αφήγηση ολοκληρώθηκε";
-        audioEqualizer.style.display = "none";
-      });
-
-      closeInfoBtn.addEventListener('click', () => {
-        if (activeVideo) {
-          activeVideo.pause();
-          activeVideo.currentTime = 0;
-        }
-        infoCard.style.display = "none";
-        scanReticle.style.borderColor = "#C49B55";
-        audioEqualizer.style.display = "none";
-        
-        scanReticle.style.display = "block";
-        scanText.style.display = "block";
-      });
-    </script>
-  </body>
-</html>
