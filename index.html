@@ -17,26 +17,26 @@
         position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
         background-color: #706C62; z-index: 10000;
         display: flex; flex-direction: column; justify-content: space-around; align-items: center;
-        overflow-y: auto; padding: 10px 20px 15px 20px; box-sizing: border-box;
+        overflow-y: auto; padding: 6px 20px 15px 20px; box-sizing: border-box;
       }
 
       .header-section {
         text-align: center; color: #fff; width: 100%; margin-top: 0;
       }
       .header-section img {
-        width: 86px; height: auto; margin-bottom: 4px;
+        width: 82px; height: auto; margin-bottom: 4px;
       }
       .header-section h2 {
-        font-size: 17.5px; line-height: 1.2; margin: 2px 0; font-weight: bold;
+        font-size: 19px; line-height: 1.25; margin: 2px 0; font-weight: bold;
       }
       .badge-box {
         border: 1.5px solid #C49B55; border-radius: 10px; padding: 6px 14px;
-        display: inline-block; color: #EEDDBB; font-size: 12.5px; font-weight: 500;
-        margin-top: 10px; background-color: transparent; text-align: center; line-height: 1.35;
+        display: inline-block; color: #EEDDBB; font-size: 13.5px; font-weight: 500;
+        margin-top: 12px; background-color: transparent; text-align: center; line-height: 1.35;
       }
 
       .features-wrapper {
-        width: 100%; max-width: 390px; display: flex; flex-direction: column; gap: 11px;
+        width: 100%; max-width: 390px; display: flex; flex-direction: column; gap: 10px;
         margin: 2px 0;
       }
       .feature-card {
@@ -50,10 +50,10 @@
         font-size: 18px;
       }
       .feature-text h3 {
-        color: #fff; font-size: 15px; margin: 0 0 2px 0; font-weight: bold;
+        color: #fff; font-size: 16px; margin: 0 0 2px 0; font-weight: bold;
       }
       .feature-text p {
-        color: #E2DCD6; font-size: 12px; margin: 0; line-height: 1.25;
+        color: #E2DCD6; font-size: 13px; margin: 0; line-height: 1.25;
       }
 
       .cta-container {
@@ -358,4 +358,72 @@
           pausePlayBtn.textContent = "❚❚";
         } else {
           activeVideo.pause();
-          pausePlayBtn.textContent
+          pausePlayBtn.textContent = "▶";
+        }
+      });
+
+      bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
+      modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
+
+      startBtn.addEventListener('click', () => {
+        welcomeScreen.style.display = 'none';
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+        
+        [videoPoulos, videoPappous].forEach(v => { v.load(); });
+
+        if (sceneEl.systems["mindar-image-system"]) {
+          sceneEl.systems["mindar-image-system"].start();
+        }
+      });
+
+      targetPoulos.addEventListener("targetFound", () => {
+        activeVideo = videoPoulos;
+        document.querySelector('#arVideoPoulos').setAttribute('visible', 'true');
+        
+        infoCard.style.display = "none";
+        bottomContainer.style.display = "flex";
+        equalizerBar.style.display = "none";
+        pausePlayBtn.textContent = "❚❚";
+
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        activeVideo.play().catch(e => console.log(e));
+        markExhibitAsVisited(4);
+      });
+
+      targetPoulos.addEventListener("targetLost", () => {});
+
+      targetPappous.addEventListener("targetFound", () => {
+        activeVideo = videoPappous;
+        
+        if (videoPappous.currentTime < 53 || videoPappous.currentTime >= 60) {
+          document.querySelector('#arVideoPappous').setAttribute('visible', 'true');
+          bottomContainer.style.display = "flex";
+        }
+        
+        pausePlayBtn.textContent = "❚❚";
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        activeVideo.play().catch(e => console.log(e));
+        markExhibitAsVisited(3);
+      });
+
+      targetPappous.addEventListener("targetLost", () => {});
+
+      function markExhibitAsVisited(index) {
+        const boxItem = document.getElementById(`box-${index}`);
+        if (boxItem && !boxItem.classList.contains('visited')) {
+          boxItem.classList.add('visited');
+          visitedTotal++;
+          visitedCountEl.textContent = visitedTotal;
+        }
+      }
+
+      videoPoulos.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
+      videoPappous.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
+    </script>
+  </body>
+</html>
