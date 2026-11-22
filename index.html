@@ -283,6 +283,7 @@
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
       <a-assets>
+        <video id="videoGamos" src="gamos.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
         <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
@@ -290,7 +291,11 @@
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0"></a-entity>
-      <a-entity mindar-image-target="targetIndex: 1"></a-entity>
+      
+      <a-entity mindar-image-target="targetIndex: 1" id="target-gamos">
+        <a-video id="arVideoGamos" src="#videoGamos" width="1.05" height="1.86" position="0 0 0"></a-video>
+      </a-entity>
+
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
       
       <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
@@ -319,6 +324,8 @@
       const modalCloseBtn = document.getElementById('modalCloseBtn');
       const sceneEl = document.querySelector('a-scene');
 
+      const targetGamos = document.querySelector('#target-gamos');
+      const videoGamos = document.querySelector('#videoGamos');
       const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
       const targetPappous = document.querySelector('#target-pappous');
@@ -327,6 +334,18 @@
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
       let activeVideo = null;
+
+      // Χρονικός έλεγχος για τον Γάμο (από 00:01:18:09 -> ~78s και μετά ηχητικό με equalizer)
+      videoGamos.addEventListener('timeupdate', () => {
+        if (activeVideo !== videoGamos) return;
+        let currentTime = videoGamos.currentTime;
+
+        if (currentTime >= 78) {
+          equalizerBar.style.display = "flex";
+        } else {
+          equalizerBar.style.display = "none";
+        }
+      });
 
       // Χρονικός έλεγχος για τον Παππού
       videoPappous.addEventListener('timeupdate', () => {
@@ -370,12 +389,30 @@
         scanReticle.style.display = 'block';
         scanText.style.display = 'block';
         
-        [videoPoulos, videoPappous].forEach(v => { v.load(); });
+        [videoGamos, videoPoulos, videoPappous].forEach(v => { v.load(); });
 
         if (sceneEl.systems["mindar-image-system"]) {
           sceneEl.systems["mindar-image-system"].start();
         }
       });
+
+      targetGamos.addEventListener("targetFound", () => {
+        activeVideo = videoGamos;
+        document.querySelector('#arVideoGamos').setAttribute('visible', 'true');
+
+        infoCard.style.display = "none";
+        bottomContainer.style.display = "flex";
+        equalizerBar.style.display = videoGamos.currentTime >= 78 ? "flex" : "none";
+        pausePlayBtn.textContent = "❚❚";
+
+        scanReticle.style.display = "none";
+        scanText.style.display = "none";
+
+        activeVideo.play().catch(e => console.log(e));
+        markExhibitAsVisited(1);
+      });
+
+      targetGamos.addEventListener("targetLost", () => {});
 
       targetPoulos.addEventListener("targetFound", () => {
         activeVideo = videoPoulos;
@@ -422,6 +459,7 @@
         }
       }
 
+      videoGamos.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
       videoPoulos.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
       videoPappous.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
     </script>
