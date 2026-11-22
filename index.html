@@ -120,4 +120,456 @@
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background-color: rgba(45, 35, 33, 0.95); padding: 12px 22px;
         border-radius: 20px; display: none; align-items: center; gap: 10px;
-        z-index: 9
+        z-index: 9999; border: 1.5px solid #C49B55; display: none;
+        box-shadow: 0 6px 22px rgba(0,0,0,0.65);
+      }
+      .equalizer {
+        display: flex; align-items: flex-end; gap: 4px; height: 18px;
+      }
+      .equalizer span {
+        width: 4px; background-color: #C49B55; border-radius: 2px;
+        animation: bounce 0.8s infinite ease-in-out alternate;
+      }
+      .equalizer span:nth-child(2) { animation-delay: 0.2s; }
+      .equalizer span:nth-child(3) { animation-delay: 0.4s; }
+      .equalizer span:nth-child(4) { animation-delay: 0.1s; }
+      .equalizer span:nth-child(5) { animation-delay: 0.3s; }
+      @keyframes bounce {
+        0% { height: 4px; }
+        100% { height: 18px; }
+      }
+
+      /* MODAL (3-1-3) */
+      #exhibitsModal {
+        position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+        background-color: rgba(25, 20, 18, 0.98); z-index: 20000;
+        display: none; flex-direction: column; padding: 20px; box-sizing: border-box;
+        overflow-y: auto; justify-content: space-between;
+      }
+      .modal-header {
+        display: flex; justify-content: space-between; align-items: center;
+        border-bottom: 1px solid rgba(196,155,85,0.3); padding-bottom: 12px; margin-bottom: 10px;
+        flex-shrink: 0; width: 100%; max-width: 400px; margin-left: auto; margin-right: auto;
+      }
+      .modal-header h3 { color: #E5C158; margin: 0; font-size: 20px; }
+      #modalCloseBtn {
+        background-color: #9A2B27; color: white; border: none; border-radius: 12px;
+        padding: 6px 14px; font-size: 13px; font-weight: bold; cursor: pointer;
+      }
+
+      .modal-custom-layout {
+        display: flex; flex-direction: column; align-items: center; gap: 22px; width: 100%; margin: auto 0; padding: 10px 0;
+      }
+      .modal-row-3 { display: flex; justify-content: center; gap: 18px; width: 100%; }
+      .modal-row-1 { display: flex; justify-content: center; width: 100%; }
+
+      .modal-box {
+        width: 102px; height: 102px; background-color: #2D2321; border: 2px solid #5A4842;
+        border-radius: 18px; overflow: hidden; opacity: 0.35; transition: all 0.3s ease;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+      }
+      .modal-box img { width: 100%; height: 100%; object-fit: cover; }
+      .modal-box.visited {
+        opacity: 1; border: 3px solid #E5C158;
+        box-shadow: 0 0 18px rgba(229,193,88,0.9);
+        transform: scale(1.04);
+      }
+
+      #scanReticle {
+        position: fixed; top: 45%; left: 50%; transform: translate(-50%, -50%);
+        width: 240px; height: 240px; border: 2px solid #C49B55; border-radius: 20px;
+        pointer-events: none; z-index: 9990; box-shadow: 0 0 20px rgba(196, 155, 85, 0.2);
+        display: none;
+      }
+      #scanText {
+        position: fixed; top: calc(45% + 135px); left: 50%; transform: translateX(-50%);
+        color: #ffffff; background: rgba(0,0,0,0.75); padding: 8px 16px; border-radius: 20px;
+        font-size: 13px; font-weight: 500; z-index: 9990; border: 1px solid rgba(196,155,85,0.4);
+        display: none; text-align: center; white-space: nowrap;
+      }
+    </style>
+  </head>
+  <body>
+
+    <!-- ΟΘΟΝΗ ΚΑΛΩΣΟΡΙΣΜΑΤΟΣ -->
+    <div id="welcomeScreen">
+      <div class="header-section">
+        <img src="images/logo.svg" alt="Λογότυπο Μουσείου">
+        <h2>Μουσείο Προσφυγικής Μνήμης 1922<br>Σκάλα Λουτρών</h2>
+        <div class="badge-box">Ψηφιακός Οδηγός<br>Επαυξημένης Πραγματικότητας (Web AR)</div>
+      </div>
+
+      <div class="features-wrapper">
+        <div class="feature-card">
+          <div class="feature-icon">🎧</div>
+          <div class="feature-text">
+            <h3>Χρησιμοποιήστε Ακουστικά</h3>
+            <p>Για να ακούσετε τις ηχητικές μαρτυρίες.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📷</div>
+          <div class="feature-text">
+            <h3>Άδεια Κάμερας</h3>
+            <p>Επιτρέψτε την κάμερα για αναγνώριση των AR δεικτών.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">🔲</div>
+          <div class="feature-text">
+            <h3>Ελεύθερη Περιήγηση</h3>
+            <p>Ανακαλύψτε 7 φυσικά εκθέματα, με όποια σειρά θέλετε.</p>
+          </div>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">📱</div>
+          <div class="feature-text">
+            <h3>Σταθερή Σάρωση</h3>
+            <p>Κρατήστε το κινητό σταθερό όσο προβάλλετε το υλικό για να μην χάνεται η εικόνα.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cta-container">
+        <button id="startBtn">Έναρξη Εμπειρίας AR</button>
+        <div class="cta-subtext">Λειτουργεί απευθείας στο πρόγραμμα περιήγησης - Χωρίς εγκατάσταση</div>
+      </div>
+    </div>
+
+    <!-- Στόχος Σάρωσης & Λευκό Κείμενο Οδηγίας -->
+    <div id="scanReticle"></div>
+    <div id="scanText">Στρέψτε την κάμερα σε ένα από τα 7 εκθέματα</div>
+
+    <!-- Σταθερό 2D Overlay Βίντεο για τον Γάμο -->
+    <div id="videoOverlayContainer">
+      <video id="videoGamos" src="gamos.mp4" preload="none" crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </div>
+
+    <!-- Μεγάλο Κεντρικό Μήνυμα -->
+    <div id="infoCard">
+      Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!
+    </div>
+
+    <!-- Equalizer Bar για το ηχητικό -->
+    <div id="equalizerBar">
+      <span style="font-size: 12px; color: #C49B55; font-weight: bold;">Συνέχεια ηχητικής</span>
+      <div class="equalizer" id="audioEqualizer">
+        <span></span><span></span><span></span><span></span><span></span>
+      </div>
+    </div>
+
+    <!-- ΚΑΤΩ ΜΠΑΡΑ (Pause/Play αριστερά & Συλλογή δεξιά) -->
+    <div id="bottomContainer">
+      <button id="pausePlayBtn">❚❚</button>
+      <div id="bottomTray">
+        <div class="tray-info-text">
+          <span>Η Συλλογή μου ( <span id="visitedCount">0</span>/7 )</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ΑΝΑΔΥΟΜΕΝΟ ΠΑΡΑΘΥΡΟ (MODAL) ΜΕ ΔΙΑΤΑΞΗ 3-1-3 -->
+    <div id="exhibitsModal">
+      <div class="modal-header">
+        <h3>Η Συλλογή μου</h3>
+        <button id="modalCloseBtn">Κλείσιμο ✕</button>
+      </div>
+
+      <div class="modal-custom-layout">
+        <div class="modal-row-3">
+          <div class="modal-box" id="box-0"><img src="images/newborn.jpg" alt="Νέα Ζωή"></div>
+          <div class="modal-box" id="box-1"><img src="images/gamos2.jpg" alt="Γάμος"></div>
+          <div class="modal-box" id="box-2"><img src="images/smirni.jpg" alt="Σμύρνη"></div>
+        </div>
+        <div class="modal-row-1">
+          <div class="modal-box" id="box-4"><img src="images/poulos.jpg" alt="Θάνος Πούλος"></div>
+        </div>
+        <div class="modal-row-3">
+          <div class="modal-box" id="box-3"><img src="images/pappous.jpg" alt="Παππούς"></div>
+          <div class="modal-box" id="box-5"><img src="images/filia.jpg" alt="Φιλία"></div>
+          <div class="modal-box" id="box-6"><img src="images/raptomihani.jpg" alt="Ραπτομηχανή"></div>
+        </div>
+      </div>
+      <div style="height: 10px;"></div>
+    </div>
+
+    <!-- Σκηνή AR -->
+    <a-scene 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.001; filterBeta: 0.01;" 
+      color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+      
+      <a-assets>
+        <video id="videoPoulos" src="poulos_v3.mp4" preload="none" crossorigin="anonymous" playsinline webkit-playsinline></video>
+        <video id="videoPappous" src="pappous.mp4" preload="none" crossorigin="anonymous" playsinline webkit-playsinline></video>
+      </a-assets>
+
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+
+      <a-entity mindar-image-target="targetIndex: 0"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 1" id="target-gamos"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 2"></a-entity>
+      
+      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
+      </a-entity>
+      
+      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
+        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
+      </a-entity>
+
+      <a-entity mindar-image-target="targetIndex: 5"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 6"></a-entity>
+    </a-scene>
+
+    <script>
+      const welcomeScreen = document.getElementById('welcomeScreen');
+      const startBtn = document.getElementById('startBtn');
+      const videoOverlayContainer = document.getElementById('videoOverlayContainer');
+      const infoCard = document.getElementById('infoCard');
+      const bottomContainer = document.getElementById('bottomContainer');
+      const pausePlayBtn = document.getElementById('pausePlayBtn');
+      const equalizerBar = document.getElementById('equalizerBar');
+      const scanReticle = document.getElementById('scanReticle');
+      const scanText = document.getElementById('scanText');
+      const bottomTray = document.getElementById('bottomTray');
+      const exhibitsModal = document.getElementById('exhibitsModal');
+      const modalCloseBtn = document.getElementById('modalCloseBtn');
+      const sceneEl = document.querySelector('a-scene');
+
+      const targetGamos = document.querySelector('#target-gamos');
+      const videoGamos = document.querySelector('#videoGamos');
+
+      const targetPoulos = document.querySelector('#target-poulos');
+      const videoPoulos = document.querySelector('#videoPoulos');
+      const arVideoPoulos = document.querySelector('#arVideoPoulos');
+
+      const targetPappous = document.querySelector('#target-pappous');
+      const videoPappous = document.querySelector('#videoPappous');
+      const arVideoPappous = document.querySelector('#arVideoPappous');
+
+      const visitedCountEl = document.getElementById('visitedCount');
+      let visitedTotal = 0;
+      let activeVideo = null;
+      let storyLocked = false;
+
+      function ensureVideoLoadedAndPlay(videoEl) {
+        if (videoEl.readyState === 0) {
+          videoEl.load();
+        }
+        videoEl.play().catch(e => console.log(e));
+      }
+
+      function canAcceptNewTarget(videoEl) {
+        if (!activeVideo) return true;
+        if (activeVideo === videoEl) return true;
+        if (activeVideo.ended || !storyLocked) return true;
+        return false;
+      }
+
+      function returnToScanState(finishedVideo) {
+        if (finishedVideo) {
+          finishedVideo.pause();
+          finishedVideo.currentTime = 0;
+        }
+
+        arVideoPappous.setAttribute('visible', 'false');
+        arVideoPoulos.setAttribute('visible', 'false');
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
+
+        infoCard.style.display = 'none';
+        equalizerBar.style.display = 'none';
+        bottomContainer.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
+
+        activeVideo = null;
+        storyLocked = false;
+
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+      }
+
+      function updateGamosState() {
+        if (activeVideo !== videoGamos || videoGamos.ended) return;
+        const currentTime = videoGamos.currentTime;
+
+        if (currentTime >= 78) {
+          videoOverlayContainer.style.display = 'none';
+          videoGamos.style.display = 'none';
+          equalizerBar.style.display = 'flex';
+          bottomContainer.style.display = 'flex';
+          infoCard.style.display = 'none';
+        } else {
+          equalizerBar.style.display = 'none';
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          videoGamos.style.display = 'block';
+          videoOverlayContainer.style.display = 'block';
+        }
+      }
+
+      // Χρονικός έλεγχος για τον Παππού (3D)
+      videoPappous.addEventListener('timeupdate', () => {
+        if (activeVideo !== videoPappous || videoPappous.ended) return;
+        let currentTime = videoPappous.currentTime;
+        
+        if (currentTime >= 53 && currentTime < 60) {
+          arVideoPappous.setAttribute('visible', 'false');
+          infoCard.style.display = 'block';
+          bottomContainer.style.display = 'none';
+          equalizerBar.style.display = 'none';
+        } else if (currentTime >= 60) {
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          equalizerBar.style.display = 'flex';
+          arVideoPappous.setAttribute('visible', 'false');
+        } else {
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          equalizerBar.style.display = 'none';
+          arVideoPappous.setAttribute('visible', 'true');
+        }
+      });
+
+      // Χρονικός έλεγχος για τον Γάμο (2D)
+      videoGamos.addEventListener('timeupdate', () => {
+        updateGamosState();
+      });
+
+      // Λειτουργία Pause / Play (με σύμβολα ❚❚ και ▶)
+      pausePlayBtn.addEventListener('click', () => {
+        if (!activeVideo) return;
+        if (activeVideo.paused) {
+          ensureVideoLoadedAndPlay(activeVideo);
+          pausePlayBtn.textContent = '❚❚';
+          storyLocked = true;
+        } else {
+          activeVideo.pause();
+          pausePlayBtn.textContent = '▶';
+          storyLocked = false;
+        }
+      });
+
+      bottomTray.addEventListener('click', () => { exhibitsModal.style.display = 'flex'; });
+      modalCloseBtn.addEventListener('click', (e) => { e.stopPropagation(); exhibitsModal.style.display = 'none'; });
+
+      startBtn.addEventListener('click', () => {
+        welcomeScreen.style.display = 'none';
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+
+        // Δεν φορτώνουμε όλα τα βίντεο μονομιάς· φορτώνει μόνο το marker που θα σκαναριστεί
+        if (sceneEl.systems['mindar-image-system']) {
+          sceneEl.systems['mindar-image-system'].start();
+        }
+      });
+
+      // Γάμος (2D)
+      targetGamos.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoGamos)) return;
+
+        if (activeVideo && activeVideo !== videoGamos) {
+          activeVideo.pause();
+        }
+        activeVideo = videoGamos;
+        storyLocked = true;
+
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
+
+        updateGamosState();
+        ensureVideoLoadedAndPlay(activeVideo);
+        markExhibitAsVisited(1);
+      });
+
+      targetGamos.addEventListener('targetLost', () => {});
+
+      // Πούλος (3D)
+      targetPoulos.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoPoulos)) return;
+
+        if (activeVideo && activeVideo !== videoPoulos) {
+          activeVideo.pause();
+        }
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
+
+        activeVideo = videoPoulos;
+        storyLocked = true;
+        arVideoPoulos.setAttribute('visible', 'true');
+        
+        infoCard.style.display = 'none';
+        bottomContainer.style.display = 'flex';
+        equalizerBar.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
+
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
+
+        ensureVideoLoadedAndPlay(activeVideo);
+        markExhibitAsVisited(4);
+      });
+
+      targetPoulos.addEventListener('targetLost', () => {});
+
+      // Παππούς (3D)
+      targetPappous.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoPappous)) return;
+
+        if (activeVideo && activeVideo !== videoPappous) {
+          activeVideo.pause();
+        }
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
+
+        activeVideo = videoPappous;
+        storyLocked = true;
+        
+        if (videoPappous.currentTime < 53 || videoPappous.currentTime >= 60) {
+          arVideoPappous.setAttribute('visible', 'true');
+          bottomContainer.style.display = 'flex';
+        }
+        
+        pausePlayBtn.textContent = '❚❚';
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
+
+        ensureVideoLoadedAndPlay(activeVideo);
+        markExhibitAsVisited(3);
+      });
+
+      targetPappous.addEventListener('targetLost', () => {});
+
+      function markExhibitAsVisited(index) {
+        const boxItem = document.getElementById(`box-${index}`);
+        if (boxItem && !boxItem.classList.contains('visited')) {
+          boxItem.classList.add('visited');
+          visitedTotal++;
+          visitedCountEl.textContent = visitedTotal;
+        }
+      }
+
+      videoGamos.addEventListener('ended', () => {
+        if (activeVideo === videoGamos) {
+          returnToScanState(videoGamos);
+        }
+      });
+
+      videoPoulos.addEventListener('ended', () => {
+        if (activeVideo === videoPoulos) {
+          returnToScanState(videoPoulos);
+        }
+      });
+
+      videoPappous.addEventListener('ended', () => {
+        if (activeVideo === videoPappous) {
+          returnToScanState(videoPappous);
+        }
+      });
+    </script>
+  </body>
+</html>
