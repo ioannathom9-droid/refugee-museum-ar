@@ -102,12 +102,13 @@
         color: #FFFFFF; font-size: 16px; font-weight: bold; letter-spacing: 0.4px; white-space: nowrap;
       }
 
-      /* Equalizer Bar (εμφανίζεται μόνο στο ηχητικό) */
+      /* Equalizer Bar (στη μέση της οθόνης για ηχητικό μόνο) */
       #equalizerBar {
-        position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
-        background-color: rgba(45, 35, 33, 0.95); padding: 8px 18px;
-        border-radius: 20px; display: none; align-items: center; gap: 8px;
+        position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+        background-color: rgba(45, 35, 33, 0.95); padding: 12px 22px;
+        border-radius: 20px; display: none; align-items: center; gap: 10px;
         z-index: 9999; border: 1.5px solid #C49B55;
+        box-shadow: 0 6px 22px rgba(0,0,0,0.65);
       }
       .equalizer {
         display: flex; align-items: flex-end; gap: 4px; height: 18px;
@@ -236,7 +237,7 @@
 
     <!-- Equalizer Bar για το ηχητικό -->
     <div id="equalizerBar">
-      <span style="font-size: 11px; color: #C49B55; font-weight: bold;">Συνέχεια ηχητικής</span>
+      <span style="font-size: 12px; color: #C49B55; font-weight: bold;">Συνέχεια ηχητικής</span>
       <div class="equalizer" id="audioEqualizer">
         <span></span><span></span><span></span><span></span><span></span>
       </div>
@@ -288,24 +289,17 @@
         <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
       </a-assets>
 
-      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: false">
+        <a-video id="arVideoGamos" src="#videoGamos" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
+        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
+      </a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0"></a-entity>
-      
-      <a-entity mindar-image-target="targetIndex: 1" id="target-gamos">
-        <a-video id="arVideoGamos" src="#videoGamos" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
-      </a-entity>
-
+      <a-entity mindar-image-target="targetIndex: 1" id="target-gamos"></a-entity>
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
-      
-      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
-        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
-      </a-entity>
-      
-      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
-        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
-      </a-entity>
-
+      <a-entity mindar-image-target="targetIndex: 3" id="target-pappous"></a-entity>
+      <a-entity mindar-image-target="targetIndex: 4" id="target-poulos"></a-entity>
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
       <a-entity mindar-image-target="targetIndex: 6"></a-entity>
     </a-scene>
@@ -343,52 +337,21 @@
       let visitedTotal = 0;
       let activeVideo = null;
 
-      function activateExhibit(videoEl, arVideoEl, exhibitIndex) {
-        // Αν ξαναβρεί το ήδη ενεργό έκθεμα, απλώς διασφαλίζουμε ότι παίζει και φαίνεται σταθερά
-        if (activeVideo === videoEl) {
-          if (videoEl === videoPappous) {
-            updatePappousState();
-          } else if (videoEl === videoGamos) {
-            arVideoGamos.setAttribute('visible', 'true');
-            infoCard.style.display = 'none';
-            bottomContainer.style.display = 'flex';
-            equalizerBar.style.display = videoGamos.currentTime >= 78 ? 'flex' : 'none';
-          } else {
-            arVideoEl.setAttribute('visible', 'true');
-            infoCard.style.display = 'none';
-            bottomContainer.style.display = 'flex';
-            equalizerBar.style.display = 'none';
-          }
-          if (videoEl.paused) {
-            videoEl.play().catch(e => console.log(e));
-          }
-          pausePlayBtn.textContent = videoEl.paused ? '▶' : '❚❚';
-          markExhibitAsVisited(exhibitIndex);
-          return;
-        }
+      function updateGamosState() {
+        if (activeVideo !== videoGamos) return;
+        const currentTime = videoGamos.currentTime;
 
-        // Όταν περνάμε σε νέο έκθεμα, κρύβουμε τα υπόλοιπα <a-video>
-        allArVideos.forEach(v => v.setAttribute('visible', 'false'));
-        infoCard.style.display = 'none';
-        equalizerBar.style.display = 'none';
-
-        activeVideo = videoEl;
-        bottomContainer.style.display = 'flex';
-        scanReticle.style.display = 'none';
-        scanText.style.display = 'none';
-
-        if (videoEl === videoPappous) {
-          updatePappousState();
-        } else if (videoEl === videoGamos) {
-          arVideoGamos.setAttribute('visible', 'true');
-          equalizerBar.style.display = videoGamos.currentTime >= 78 ? 'flex' : 'none';
+        if (currentTime >= 78 && !videoGamos.ended) {
+          arVideoGamos.setAttribute('visible', 'false');
+          equalizerBar.style.display = 'flex';
+          bottomContainer.style.display = 'flex';
+          infoCard.style.display = 'none';
         } else {
-          arVideoEl.setAttribute('visible', 'true');
+          equalizerBar.style.display = 'none';
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          arVideoGamos.setAttribute('visible', 'true');
         }
-
-        videoEl.play().catch(e => console.log(e));
-        pausePlayBtn.textContent = '❚❚';
-        markExhibitAsVisited(exhibitIndex);
       }
 
       function updatePappousState() {
@@ -413,22 +376,43 @@
         }
       }
 
-      // Χρονικός έλεγχος για τον Γάμο (από 00:01:18:09 -> ~78s και μετά ηχητικό με equalizer)
-      videoGamos.addEventListener('timeupdate', () => {
-        if (activeVideo !== videoGamos) return;
-        if (videoGamos.currentTime >= 78 && !videoGamos.ended) {
-          equalizerBar.style.display = 'flex';
-        } else {
+      function activateExhibit(videoEl, arVideoEl, exhibitIndex) {
+        if (activeVideo !== videoEl) {
+          allArVideos.forEach(v => v.setAttribute('visible', 'false'));
+          infoCard.style.display = 'none';
           equalizerBar.style.display = 'none';
+          activeVideo = videoEl;
         }
+
+        bottomContainer.style.display = 'flex';
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
+
+        if (videoEl === videoGamos) {
+          updateGamosState();
+        } else if (videoEl === videoPappous) {
+          updatePappousState();
+        } else {
+          infoCard.style.display = 'none';
+          equalizerBar.style.display = 'none';
+          arVideoEl.setAttribute('visible', 'true');
+        }
+
+        if (videoEl.paused) {
+          videoEl.play().catch(e => console.log(e));
+        }
+        pausePlayBtn.textContent = videoEl.paused ? '▶' : '❚❚';
+        markExhibitAsVisited(exhibitIndex);
+      }
+
+      videoGamos.addEventListener('timeupdate', () => {
+        updateGamosState();
       });
 
-      // Χρονικός έλεγχος για τον Παππού
       videoPappous.addEventListener('timeupdate', () => {
         updatePappousState();
       });
 
-      // Λειτουργία Pause / Play (με σύμβολα ❚❚ και ▶)
       pausePlayBtn.addEventListener('click', () => {
         if (!activeVideo) return;
         if (activeVideo.paused) {
@@ -455,7 +439,6 @@
         }
       });
 
-      // Σταθερή παραμονή: στο targetLost δεν χάνεται ούτε η εικόνα ούτε το ηχητικό
       targetGamos.addEventListener('targetFound', () => {
         activateExhibit(videoGamos, arVideoGamos, 1);
       });
