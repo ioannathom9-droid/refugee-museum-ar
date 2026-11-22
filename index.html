@@ -68,6 +68,19 @@
         color: #E2DCD6; font-size: 11.5px; margin-top: 8px; line-height: 1.3;
       }
 
+      /* Σταθερό Πλαίσιο Προβολής Βίντεο στην οθόνη (δεν χάνεται ποτέ με την κίνηση) */
+      #videoOverlayContainer {
+        position: fixed; top: 44%; left: 50%; transform: translate(-50%, -50%);
+        width: 78vw; max-width: 320px; max-height: 62vh;
+        border: 2.5px solid #C49B55; border-radius: 16px;
+        overflow: hidden; background-color: #000;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.8);
+        z-index: 9995; display: none;
+      }
+      #videoOverlayContainer video {
+        width: 100%; height: auto; display: none; object-fit: contain;
+      }
+
       /* Μεγάλο κεντρικό μήνυμα για τα κειμήλια (Χωρίς κουμπί Χ) */
       #infoCard {
         position: fixed; top: 32%; left: 50%; transform: translateX(-50%);
@@ -230,6 +243,13 @@
     <div id="scanReticle"></div>
     <div id="scanText">Στρέψτε την κάμερα σε ένα από τα 7 εκθέματα</div>
 
+    <!-- Σταθερό Overlay Βίντεο (ώστε να μη χάνεται ποτέ όταν κουνιέται το κινητό) -->
+    <div id="videoOverlayContainer">
+      <video id="videoGamos" src="gamos.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+      <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+      <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
+    </div>
+
     <!-- Μεγάλο Κεντρικό Μήνυμα -->
     <div id="infoCard">
       Κοιτάξτε μπροστά σας για να δείτε τα πραγματικά όπλα και τα Αριστεία Ανδρείας της εποχής, ακούγοντας τη συνέχεια της ιστορίας μας!
@@ -280,20 +300,10 @@
 
     <!-- Σκηνή AR -->
     <a-scene 
-      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.0001; filterBeta: 0.001;" 
+      mindar-image="imageTargetSrc: ./targets.mind; autoStart: false; uiLoading: no; uiScanning: no; filterMinCF: 0.001; filterBeta: 0.01;" 
       color-space="sRGB" renderer="colorManagement: true" vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
       
-      <a-assets>
-        <video id="videoGamos" src="gamos.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
-        <video id="videoPoulos" src="poulos_v3.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
-        <video id="videoPappous" src="pappous.mp4" preload="auto" crossorigin="anonymous" playsinline webkit-playsinline></video>
-      </a-assets>
-
-      <a-camera position="0 0 0" look-controls="enabled: false">
-        <a-video id="arVideoGamos" src="#videoGamos" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
-        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
-        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 -2.5" visible="false"></a-video>
-      </a-camera>
+      <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
       <a-entity mindar-image-target="targetIndex: 0"></a-entity>
       <a-entity mindar-image-target="targetIndex: 1" id="target-gamos"></a-entity>
@@ -307,6 +317,7 @@
     <script>
       const welcomeScreen = document.getElementById('welcomeScreen');
       const startBtn = document.getElementById('startBtn');
+      const videoOverlayContainer = document.getElementById('videoOverlayContainer');
       const infoCard = document.getElementById('infoCard');
       const bottomContainer = document.getElementById('bottomContainer');
       const pausePlayBtn = document.getElementById('pausePlayBtn');
@@ -320,29 +331,36 @@
 
       const targetGamos = document.querySelector('#target-gamos');
       const videoGamos = document.querySelector('#videoGamos');
-      const arVideoGamos = document.querySelector('#arVideoGamos');
 
       const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
-      const arVideoPoulos = document.querySelector('#arVideoPoulos');
 
       const targetPappous = document.querySelector('#target-pappous');
       const videoPappous = document.querySelector('#videoPappous');
-      const arVideoPappous = document.querySelector('#arVideoPappous');
 
       const allVideos = [videoGamos, videoPoulos, videoPappous];
-      const allArVideos = [arVideoGamos, arVideoPoulos, arVideoPappous];
 
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
       let activeVideo = null;
+
+      function showVideoOverlay(videoEl) {
+        allVideos.forEach(v => { v.style.display = 'none'; });
+        videoEl.style.display = 'block';
+        videoOverlayContainer.style.display = 'block';
+      }
+
+      function hideVideoOverlay() {
+        videoOverlayContainer.style.display = 'none';
+        allVideos.forEach(v => { v.style.display = 'none'; });
+      }
 
       function updateGamosState() {
         if (activeVideo !== videoGamos) return;
         const currentTime = videoGamos.currentTime;
 
         if (currentTime >= 78 && !videoGamos.ended) {
-          arVideoGamos.setAttribute('visible', 'false');
+          hideVideoOverlay();
           equalizerBar.style.display = 'flex';
           bottomContainer.style.display = 'flex';
           infoCard.style.display = 'none';
@@ -350,7 +368,7 @@
           equalizerBar.style.display = 'none';
           infoCard.style.display = 'none';
           bottomContainer.style.display = 'flex';
-          arVideoGamos.setAttribute('visible', 'true');
+          showVideoOverlay(videoGamos);
         }
       }
 
@@ -359,7 +377,7 @@
         const currentTime = videoPappous.currentTime;
 
         if (currentTime >= 53 && currentTime < 60) {
-          arVideoPappous.setAttribute('visible', 'false');
+          hideVideoOverlay();
           infoCard.style.display = 'block';
           bottomContainer.style.display = 'none';
           equalizerBar.style.display = 'none';
@@ -367,23 +385,24 @@
           infoCard.style.display = 'none';
           bottomContainer.style.display = 'flex';
           equalizerBar.style.display = videoPappous.ended ? 'none' : 'flex';
-          arVideoPappous.setAttribute('visible', 'false');
+          hideVideoOverlay();
         } else {
           infoCard.style.display = 'none';
           bottomContainer.style.display = 'flex';
           equalizerBar.style.display = 'none';
-          arVideoPappous.setAttribute('visible', 'true');
+          showVideoOverlay(videoPappous);
         }
       }
 
-      function activateExhibit(videoEl, arVideoEl, exhibitIndex) {
-        if (activeVideo !== videoEl) {
-          allArVideos.forEach(v => v.setAttribute('visible', 'false'));
+      function activateExhibit(videoEl, exhibitIndex) {
+        if (activeVideo && activeVideo !== videoEl) {
+          activeVideo.pause();
+          hideVideoOverlay();
           infoCard.style.display = 'none';
           equalizerBar.style.display = 'none';
-          activeVideo = videoEl;
         }
 
+        activeVideo = videoEl;
         bottomContainer.style.display = 'flex';
         scanReticle.style.display = 'none';
         scanText.style.display = 'none';
@@ -395,7 +414,7 @@
         } else {
           infoCard.style.display = 'none';
           equalizerBar.style.display = 'none';
-          arVideoEl.setAttribute('visible', 'true');
+          showVideoOverlay(videoEl);
         }
 
         if (videoEl.paused) {
@@ -440,17 +459,17 @@
       });
 
       targetGamos.addEventListener('targetFound', () => {
-        activateExhibit(videoGamos, arVideoGamos, 1);
+        activateExhibit(videoGamos, 1);
       });
       targetGamos.addEventListener('targetLost', () => {});
 
       targetPoulos.addEventListener('targetFound', () => {
-        activateExhibit(videoPoulos, arVideoPoulos, 4);
+        activateExhibit(videoPoulos, 4);
       });
       targetPoulos.addEventListener('targetLost', () => {});
 
       targetPappous.addEventListener('targetFound', () => {
-        activateExhibit(videoPappous, arVideoPappous, 3);
+        activateExhibit(videoPappous, 3);
       });
       targetPappous.addEventListener('targetLost', () => {});
 
