@@ -119,7 +119,7 @@
       #equalizerBar {
         position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
         background-color: rgba(45, 35, 33, 0.95); padding: 12px 22px;
-        border-radius: 20px; display: flex; align-items: center; gap: 10px;
+        border-radius: 20px; display: none; align-items: center; gap: 10px;
         z-index: 9999; border: 1.5px solid #C49B55; display: none;
         box-shadow: 0 6px 22px rgba(0,0,0,0.65);
       }
@@ -313,11 +313,11 @@
       <a-entity mindar-image-target="targetIndex: 2"></a-entity>
       
       <a-entity mindar-image-target="targetIndex: 3" id="target-pappous">
-        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0"></a-video>
+        <a-video id="arVideoPappous" src="#videoPappous" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
       </a-entity>
       
       <a-entity mindar-image-target="targetIndex: 4" id="target-poulos">
-        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0"></a-video>
+        <a-video id="arVideoPoulos" src="#videoPoulos" width="1.05" height="1.86" position="0 0 0" visible="false"></a-video>
       </a-entity>
 
       <a-entity mindar-image-target="targetIndex: 5"></a-entity>
@@ -344,19 +344,52 @@
 
       const targetPoulos = document.querySelector('#target-poulos');
       const videoPoulos = document.querySelector('#videoPoulos');
+      const arVideoPoulos = document.querySelector('#arVideoPoulos');
 
       const targetPappous = document.querySelector('#target-pappous');
       const videoPappous = document.querySelector('#videoPappous');
+      const arVideoPappous = document.querySelector('#arVideoPappous');
 
       const visitedCountEl = document.getElementById('visitedCount');
       let visitedTotal = 0;
       let activeVideo = null;
+      let storyLocked = false; // Κλειδώνει την ενεργή αφήγηση μέχρι να τελειώσει
+
+      function canAcceptNewTarget(videoEl) {
+        if (!activeVideo) return true;
+        if (activeVideo === videoEl) return true;
+        if (activeVideo.ended || !storyLocked) return true;
+        return false;
+      }
+
+      function returnToScanState(finishedVideo) {
+        if (finishedVideo) {
+          finishedVideo.pause();
+          finishedVideo.currentTime = 0;
+        }
+
+        arVideoPappous.setAttribute('visible', 'false');
+        arVideoPoulos.setAttribute('visible', 'false');
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
+
+        infoCard.style.display = 'none';
+        equalizerBar.style.display = 'none';
+        bottomContainer.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
+
+        activeVideo = null;
+        storyLocked = false;
+
+        scanReticle.style.display = 'block';
+        scanText.style.display = 'block';
+      }
 
       function updateGamosState() {
-        if (activeVideo !== videoGamos) return;
+        if (activeVideo !== videoGamos || videoGamos.ended) return;
         const currentTime = videoGamos.currentTime;
 
-        if (currentTime >= 78 && !videoGamos.ended) {
+        if (currentTime >= 78) {
           videoOverlayContainer.style.display = 'none';
           videoGamos.style.display = 'none';
           equalizerBar.style.display = 'flex';
@@ -373,24 +406,24 @@
 
       // Χρονικός έλεγχος για τον Παππού (3D)
       videoPappous.addEventListener('timeupdate', () => {
-        if (activeVideo !== videoPappous) return;
+        if (activeVideo !== videoPappous || videoPappous.ended) return;
         let currentTime = videoPappous.currentTime;
         
         if (currentTime >= 53 && currentTime < 60) {
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
-          infoCard.style.display = "block";
-          bottomContainer.style.display = "none";
-          equalizerBar.style.display = "none";
+          arVideoPappous.setAttribute('visible', 'false');
+          infoCard.style.display = 'block';
+          bottomContainer.style.display = 'none';
+          equalizerBar.style.display = 'none';
         } else if (currentTime >= 60) {
-          infoCard.style.display = "none";
-          bottomContainer.style.display = "flex";
-          equalizerBar.style.display = "flex";
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'false');
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          equalizerBar.style.display = 'flex';
+          arVideoPappous.setAttribute('visible', 'false');
         } else {
-          infoCard.style.display = "none";
-          bottomContainer.style.display = "flex";
-          equalizerBar.style.display = "none";
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'true');
+          infoCard.style.display = 'none';
+          bottomContainer.style.display = 'flex';
+          equalizerBar.style.display = 'none';
+          arVideoPappous.setAttribute('visible', 'true');
         }
       });
 
@@ -404,10 +437,12 @@
         if (!activeVideo) return;
         if (activeVideo.paused) {
           activeVideo.play();
-          pausePlayBtn.textContent = "❚❚";
+          pausePlayBtn.textContent = '❚❚';
+          storyLocked = true;
         } else {
           activeVideo.pause();
-          pausePlayBtn.textContent = "▶";
+          pausePlayBtn.textContent = '▶';
+          storyLocked = false;
         }
       });
 
@@ -421,78 +456,87 @@
         
         [videoGamos, videoPoulos, videoPappous].forEach(v => { v.load(); });
 
-        if (sceneEl.systems["mindar-image-system"]) {
-          sceneEl.systems["mindar-image-system"].start();
+        if (sceneEl.systems['mindar-image-system']) {
+          sceneEl.systems['mindar-image-system'].start();
         }
       });
 
       // Γάμος (2D)
-      targetGamos.addEventListener("targetFound", () => {
+      targetGamos.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoGamos)) return;
+
         if (activeVideo && activeVideo !== videoGamos) {
           activeVideo.pause();
         }
         activeVideo = videoGamos;
+        storyLocked = true;
 
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
-        pausePlayBtn.textContent = "❚❚";
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
 
         updateGamosState();
         activeVideo.play().catch(e => console.log(e));
         markExhibitAsVisited(1);
       });
 
-      targetGamos.addEventListener("targetLost", () => {});
+      targetGamos.addEventListener('targetLost', () => {});
 
       // Πούλος (3D)
-      targetPoulos.addEventListener("targetFound", () => {
+      targetPoulos.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoPoulos)) return;
+
         if (activeVideo && activeVideo !== videoPoulos) {
           activeVideo.pause();
         }
-        videoOverlayContainer.style.display = "none";
-        videoGamos.style.display = "none";
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
 
         activeVideo = videoPoulos;
-        document.querySelector('#arVideoPoulos').setAttribute('visible', 'true');
+        storyLocked = true;
+        arVideoPoulos.setAttribute('visible', 'true');
         
-        infoCard.style.display = "none";
-        bottomContainer.style.display = "flex";
-        equalizerBar.style.display = "none";
-        pausePlayBtn.textContent = "❚❚";
+        infoCard.style.display = 'none';
+        bottomContainer.style.display = 'flex';
+        equalizerBar.style.display = 'none';
+        pausePlayBtn.textContent = '❚❚';
 
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
 
         activeVideo.play().catch(e => console.log(e));
         markExhibitAsVisited(4);
       });
 
-      targetPoulos.addEventListener("targetLost", () => {});
+      targetPoulos.addEventListener('targetLost', () => {});
 
       // Παππούς (3D)
-      targetPappous.addEventListener("targetFound", () => {
+      targetPappous.addEventListener('targetFound', () => {
+        if (!canAcceptNewTarget(videoPappous)) return;
+
         if (activeVideo && activeVideo !== videoPappous) {
           activeVideo.pause();
         }
-        videoOverlayContainer.style.display = "none";
-        videoGamos.style.display = "none";
+        videoOverlayContainer.style.display = 'none';
+        videoGamos.style.display = 'none';
 
         activeVideo = videoPappous;
+        storyLocked = true;
         
         if (videoPappous.currentTime < 53 || videoPappous.currentTime >= 60) {
-          document.querySelector('#arVideoPappous').setAttribute('visible', 'true');
-          bottomContainer.style.display = "flex";
+          arVideoPappous.setAttribute('visible', 'true');
+          bottomContainer.style.display = 'flex';
         }
         
-        pausePlayBtn.textContent = "❚❚";
-        scanReticle.style.display = "none";
-        scanText.style.display = "none";
+        pausePlayBtn.textContent = '❚❚';
+        scanReticle.style.display = 'none';
+        scanText.style.display = 'none';
 
         activeVideo.play().catch(e => console.log(e));
         markExhibitAsVisited(3);
       });
 
-      targetPappous.addEventListener("targetLost", () => {});
+      targetPappous.addEventListener('targetLost', () => {});
 
       function markExhibitAsVisited(index) {
         const boxItem = document.getElementById(`box-${index}`);
@@ -505,11 +549,21 @@
 
       videoGamos.addEventListener('ended', () => {
         if (activeVideo === videoGamos) {
-          equalizerBar.style.display = "none";
+          returnToScanState(videoGamos);
         }
       });
-      videoPoulos.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
-      videoPappous.addEventListener('ended', () => { equalizerBar.style.display = "none"; });
+
+      videoPoulos.addEventListener('ended', () => {
+        if (activeVideo === videoPoulos) {
+          returnToScanState(videoPoulos);
+        }
+      });
+
+      videoPappous.addEventListener('ended', () => {
+        if (activeVideo === videoPappous) {
+          returnToScanState(videoPappous);
+        }
+      });
     </script>
   </body>
 </html>
